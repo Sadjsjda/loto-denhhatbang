@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lô Tô - Đệ Nhất Bang - Online Version</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+
+    <style>
+        :root { 
+            --primary: #00695C; 
+            --dark: #004D40; 
+            --gold: #FFD54F; 
+            --red: #E53935; 
+            --bg: #E0F2F1; 
+            --text-light: #B2DFDB; 
+            --active-color: #00E676; 
+            --history-ball-color: #FFC107;
+        }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 3px; }
+
+        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .inp-std { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .btn-full { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-login { background: var(--primary); color: white; }
+        .btn-login:hover { background: var(--dark); }
+        .btn-reg { background: white; border: 1px solid var(--primary); color: var(--primary); }
+
+        .app-layout { display: flex; height: 100%; }
+        
+        .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; }
+        .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); }
+        
+        #bang-title {
+            font-size: 36px; 
+            font-weight: 800;
+            color: var(--red); 
+            padding: 5px 0 10px 0;
+            text-shadow: 0 0 5px rgba(229, 57, 53, 0.8); 
+            line-height: 1.0; 
+        }
+        .loto-ball-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0; 
+            gap: 8px; 
+        }
+        .current-ball { 
+            width: 100px; height: 100px; 
+            background: white; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 50px; font-weight: bold; color: var(--red); border: 5px solid var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            flex-shrink: 0; 
+        }
+        .side-text { 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: var(--text-light); 
+            opacity: 0.9;
+            text-align: center;
+            flex-grow: 1; 
+            line-height: 1.2; 
+            text-transform: uppercase;
+        }
+
+        .history-panel {
+            padding: 10px; 
+            background: rgba(0,0,0,0.5); 
+            color: white; 
+            border-top: 1px solid var(--gold);
+        }
+        #hist-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px; 
+            justify-content: center;
+            padding: 5px 0; 
+            max-height: 100px; 
+            overflow-y: auto;
+            align-items: center;
+        }
+        .history-ball {
+            width: 20px;
+            height: 20px;
+            background: var(--history-ball-color); 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: black; 
+            box-shadow: 0 0 3px rgba(0,0,0,0.5);
+            animation: bounceIn 0.3s ease-out; 
+        }
+
+        .user-list-header { padding: 8px 10px; font-size: 11px; font-weight: bold; color: var(--gold); display: flex; flex-direction: column; background: rgba(0,0,0,0.1); }
+        .user-count-row { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; font-size: 10px; }
+        .online-count { color: var(--active-color); }
+        .offline-count { color: #f9a825; }
+
+        .user-list-panel { flex: 1; overflow-y: auto; padding: 10px; }
+        .user-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px; margin-bottom: 5px; border-radius: 6px; font-size: 13px; border-left: 3px solid transparent; transition: 0.2s; gap: 10px; }
+        .user-item:hover { background: rgba(255,255,255,0.1); }
+        .user-item.active { border-left-color: var(--active-color); }
+        .user-item.inactive { border-left-color: #aaa; opacity: 0.8; }
+        .u-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .u-content { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; }
+        .u-name { font-weight: bold; color: white; }
+        .u-status { font-size: 14px; } 
+        .u-info { display: flex; flex-direction: column; }
+        
+        #admin-manage-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; justify-content: center; align-items: center; }
+        .manage-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .manage-list-item { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 10px; margin-bottom: 5px; border-bottom: 1px solid #eee;
+            border-left: 4px solid var(--primary); border-radius: 4px;
+        }
+        .manage-controls { 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+        }
+        .btn-reset-pass {
+            background: #FF9800;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+        .btn-reset-pass:hover { background: #F57C00; }
+        
+        .main-stage { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; }
+        .ticket-card { 
+            background: white; 
+            width: 160px; 
+            padding: 10px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            border-top: 5px solid var(--primary); 
+            height: fit-content; 
+            transition: 0.3s; 
+            position: relative;
+        }
+        .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
+        .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
+        .t-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px; 
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 8px; 
+        }
+        .t-cell { 
+            height: 35px; 
+            background: #eee; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; 
+            font-size: 16px; 
+            border-radius: 4px; 
+            color: #555; 
+            border: 1px solid #ddd;
+        }
+        .t-cell.hit { 
+            background: var(--red); 
+            color: white; 
+            border-color: var(--red); 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        .status-footer { 
+            text-align: center; 
+            padding-top: 5px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: #777;
+        }
+        .pulse-wait {
+            color: var(--gold);
+            animation: pulse 1s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .pulse-wait .ball-icon {
+            width: 8px;
+            height: 8px;
+            background: var(--history-ball-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 3px var(--history-ball-color);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #win-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+        .win-title { color: var(--gold); font-size: 60px; margin: 0; text-shadow: 0 0 20px red; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-close-win { margin-top: 30px; padding: 12px 40px; font-size: 18px; background: white; color: var(--red); border: none; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px white; transition: 0.3s; }
+        .btn-close-win:hover { transform: scale(1.1); }
+        .hidden { display: none !important; }
+
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .control-title { font-size: 12px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
+        .manual-pick-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 5px; }
+        .mini-inp { width: 100%; padding: 8px; border: 1px solid #555; background: #333; color: white; border-radius: 4px; text-align: center; font-weight: bold; }
+        .btn-small { padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; font-size: 13px; }
+        .btn-manual { background: var(--primary); color: white; }
+        .btn-random { background: #607D8B; color: white; }
+        #ticket-editor { border-top: 1px solid #333; padding-top: 10px; margin-bottom: 10px; }
+        .locked-msg { color: #aaa; font-size: 12px; padding: 10px 0; border: 1px dashed #555; border-radius: 4px; }
+
+        .admin-tools { padding: 10px; }
+        .search-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .inp-search { flex: 1; padding: 8px; border: 1px solid #555; background: #333; color: white; border-radius: 4px; }
+        .select-filter { padding: 8px; border: 1px solid #555; background: #333; color: white; border-radius: 4px; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; }
+        .btn-del { color: #E53935; }
+        
+        .connection-status {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        .connected { background: #4CAF50; color: white; }
+        .disconnected { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+
+    <!-- THAY THẾ CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY -->
+    <script>
+        // ==== THAY CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY ====
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDEWU05dRRqhyb_CrS1QrU7vrvYTaituGI",
+  authDomain: "loto-denhatbang.firebaseapp.com",
+  projectId: "loto-denhatbang",
+  storageBucket: "loto-denhatbang.firebasestorage.app",
+  messagingSenderId: "642753941588",
+  appId: "1:642753941588:web:85457c78cc65bfcdfa1dc1",
+  measurementId: "G-1J2N59LHJF"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+        
+        // Khởi tạo Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+
+    <div id="login-modal">
+        <div class="login-box">
+            <h2 style="color: var(--primary); margin-top:0;">Lô Tô - Đệ Nhất Bang</h2>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Database chung</div>
+            <input type="text" id="u-name" class="inp-std" placeholder="Tên đăng nhập">
+            <input type="password" id="u-pass" class="inp-std" placeholder="Mật khẩu">
+            <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
+            <button class="btn-full btn-reg" onclick="handleRegister()">ĐĂNG KÝ MỚI</button>
+        </div>
+    </div>
+
+    <div id="admin-manage-modal">
+        <div class="manage-box">
+            <h2 style="color: var(--primary); margin-top:0;">QUẢN LÝ NGƯỜI DÙNG</h2>
+            
+            <button class="btn-full" style="background: #2E7D32; color: white; margin-bottom: 15px;" onclick="exportUsersToExcel()">
+                <i class="fas fa-file-excel"></i> XUẤT EXCEL (USER & PASS)
+            </button>
+            
+            <div id="admin-user-management-list"></div>
+            <button class="btn-full" style="background: #E53935; color: white; margin-top: 20px;" onclick="document.getElementById('admin-manage-modal').style.display='none'">ĐÓNG</button>
+        </div>
+    </div>
+
+    <div class="app-layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div id="bang-title">ĐỆ NHẤT BANG</div>
+                
+                <div class="loto-ball-wrapper">
+                    <div class="side-text left-text">
+                        <div>PHONG</div>
+                        <div>ĐỘ</div>
+                        <div>CHỈ</div>
+                        <div>LÀ</div>
+                        <div>NHẤT</div>
+                        <div>THỜI</div>
+                    </div>
+                    
+                    <div class="current-ball" id="ball-display">--</div>
+                    
+                    <div class="side-text right-text">
+                        <div>ĐẲNG</div>
+                        <div>CẤP</div>
+                        <div>MỚI</div> 
+                        <div>LÀ</div>
+                        <div>MÃI</div>
+                        <div>MÃI</div>
+                    </div>
+                </div>
+                
+                <div id="admin-controls" class="hidden">
+                    <div style="display:flex; gap:5px;">
+                        <button id="draw-btn" class="btn-full" style="background: var(--gold); color: black; margin-top:5px; flex:1" onclick="adminDraw()">🎲 QUAY</button>
+                        <button class="btn-full" style="background: #37474F; color: white; margin-top:5px; flex:1" onclick="adminReset()">♻ VÁN MỚI</button>
+                    </div>
+                    <button class="btn-full" style="background: #1976D2; color: white; margin-top:5px;" onclick="openAdminManageModal()">🧑‍💻 QUẢN LÝ USER</button>
+                </div>
+
+                <div id="player-controls" class="hidden">
+                    <div id="ticket-editor">
+                        <div class="control-title">🎫 CHỌN 18 SỐ CỦA BẠN</div>
+                        <div class="manual-pick-row">
+                            <input type="number" id="n1" class="mini-inp" placeholder="01">
+                            <input type="number" id="n2" class="mini-inp" placeholder="02">
+                            <input type="number" id="n3" class="mini-inp" placeholder="03">
+                            <input type="number" id="n4" class="mini-inp" placeholder="04">
+                        </div>
+                        <div style="font-size:10px; color:var(--red); margin-bottom:5px;">*Khuyến nghị dùng Đổi Ngẫu nhiên</div>
+                        <button class="btn-small btn-random" onclick="playerRandomTicket()">🔄 ĐỔI NGẪU NHIÊN 18 SỐ</button>
+                    </div>
+                    <div id="ticket-locked" class="hidden">
+                        <div class="locked-msg"><i class="fas fa-lock"></i> Đang quay số<br>Khóa đổi vé</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-tools-panel" class="admin-tools hidden">
+                <div class="search-row">
+                    <input type="text" id="search-inp" class="inp-search" placeholder="🔍 Tìm tên..." oninput="renderUI()">
+                    <select id="filter-select" class="select-filter" onchange="renderUI()">
+                        <option value="all">Tất cả</option>
+                        <option value="active">Đã Kích Hoạt</option>
+                        <option value="inactive">Chờ Duyệt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="user-list-header">
+                <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                    <span>DANH SÁCH (<span id="count-display">0</span>)</span>
+                    <span id="role-badge" style="color:white; font-weight:normal"></span>
+                </div>
+                <span class="user-count-row">
+                    <span class="online-count">Online: <b id="online-count">0</b></span>
+                    <span class="offline-count">Offline: <b id="offline-count">0</b></span>
+                </span>
+            </div>
+            <div class="user-list-panel" id="user-list"></div>
+            
+            <div class="history-panel">
+                <div style="font-size: 12px; font-weight: bold; color: var(--gold); margin-bottom: 5px; text-align: center;">LỊCH SỬ QUAY SỐ</div>
+                <div id="hist-display">Chưa quay số nào.</div>
+            </div>
+            <div style="padding: 8px 10px; font-size: 11px; text-align: center; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.1);">
+                <span style="color: var(--text-light);">Số chưa quay: </span><span id="remaining-count" style="font-weight: bold; color: var(--active-color);">90</span>
+            </div>
+        </div>
+
+        <div class="main-stage" id="stage">
+            <div id="waiting-approval" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#555;">
+                <i class="fas fa-user-clock" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary);">CHỜ ADMIN DUYỆT</h2>
+                <p>Tài khoản của bạn chưa được kích hoạt.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal">
+        <h1 class="win-title">KINH RỒI!</h1>
+        <h2 id="winner-name" style="color: white; font-size: 40px; margin-top: 10px;">...</h2>
+        <button class="btn-close-win" onclick="forceCloseModal()">❌ ĐÓNG LẠI</button>
+    </div>
+
+    <div id="connection-status" class="connection-status hidden"></div>
+
+<script>
+    // ==== CẤU HÌNH ỨNG DỤNG ====
+    const MAX_USERS = 200; 
+    const TICKET_SIZE = 18;
+    const NUMBERS_PER_ROW = 3;
+    const NUM_ROWS = 6;
+    const ADMIN_USER = 'hieuvungtau';
+    const ADMIN_PASS = 'A7727272272727';
+    const DEFAULT_PLAYER_PASS = 'denhatbang';
+
+    let myUser = null; 
+    let myRole = '';
+    let isWinModalClosed = false; 
+    let isDrawing = false;
+    let currentGameRef = null;
+    let usersRef = null;
+
+    // ==== FIREBASE FUNCTIONS ====
+    function initializeFirebase() {
+        currentGameRef = database.ref('currentGame');
+        usersRef = database.ref('users');
+        
+        // Lắng nghe thay đổi từ Firebase
+        currentGameRef.on('value', (snapshot) => {
+            const gameData = snapshot.val();
+            if (gameData) {
+                updateUI(gameData);
+            }
+        });
+        
+        usersRef.on('value', (snapshot) => {
+            const usersData = snapshot.val();
+            if (usersData) {
+                updateUsersList(usersData);
+            }
+        });
+        
+        // Theo dõi trạng thái kết nối
+        database.ref('.info/connected').on('value', (snapshot) => {
+            const statusEl = document.getElementById('connection-status');
+            if (snapshot.val() === true) {
+                statusEl.textContent = '🟢 Đã kết nối';
+                statusEl.className = 'connection-status connected';
+                statusEl.classList.remove('hidden');
+                
+                // Ẩn thông báo sau 3 giây
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 3000);
+            } else {
+                statusEl.textContent = '🔴 Mất kết nối';
+                statusEl.className = 'connection-status disconnected';
+                statusEl.classList.remove('hidden');
+            }
+        });
+    }
+
+    function getDB() {
+        return new Promise((resolve) => {
+            Promise.all([
+                new Promise(resolve => currentGameRef.once('value', snapshot => resolve(snapshot.val()))),
+                new Promise(resolve => usersRef.once('value', snapshot => resolve(snapshot.val())))
+            ]).then(([config, users]) => {
+                resolve({ config: config || getDefaultConfig(), users: users || {} });
+            });
+        });
+    }
+
+    function saveDB(data) {
+        return Promise.all([
+            currentGameRef.set(data.config),
+            usersRef.set(data.users)
+        ]);
+    }
+
+    function getDefaultConfig() {
+        return { 
+            state: 'waiting', 
+            currentNum: '--', 
+            history: [], 
+            winner: null,
+            lastUpdated: new Date().toISOString()
+        };
+    }
+
+    // ==== CÁC HÀM CHÍNH ====
+    function generateAvatarUrl(username) {
+        const hash = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const bgColor = ['3949AB', '00ACC1', '43A047', 'FB8C00'][hash % 4];
+        const textColor = 'FFFFFF';
+        const initial = username.toUpperCase().charAt(0);
+        return `https://placehold.co/40x40/${bgColor}/${textColor}?text=${initial}`;
+    }
+
+    async function handleLogin() {
+        const u = document.getElementById('u-name').value.trim().toLowerCase();
+        const p = document.getElementById('u-pass').value.trim();
+        
+        try {
+            const { users } = await getDB();
+            
+            if(users[u] && users[u].pass === p) {
+                myUser = u; 
+                myRole = users[u].role;
+                document.getElementById('login-modal').classList.add('hidden');
+                
+                const roleBadge = document.getElementById('role-badge');
+                if(myRole === 'admin') {
+                    document.getElementById('admin-controls').classList.remove('hidden');
+                    document.getElementById('admin-tools-panel').classList.remove('hidden'); 
+                    if (roleBadge) roleBadge.innerText = '[ADMIN]';
+                } else {
+                    document.getElementById('player-controls').classList.remove('hidden');
+                    if (roleBadge) roleBadge.innerText = '[ME]';
+                }
+            } else { 
+                showCustomMessage("Đăng nhập thất bại", "Sai tên hoặc mật khẩu!"); 
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            showCustomMessage("Lỗi", "Không thể kết nối đến server!");
+        }
+    }
+
+    async function handleRegister() {
+        const u = document.getElementById('u-name').value.trim().toLowerCase();
+        const p = document.getElementById('u-pass').value.trim();
+        
+        if(!u || !p) return showCustomMessage("Lỗi", "Thiếu thông tin đăng ký!");
+        if(u === ADMIN_USER) return showCustomMessage("Lỗi", "Tên này đã được sử dụng!");
+        
+        try {
+            const { users } = await getDB();
+            
+            if(Object.keys(users).length >= MAX_USERS) {
+                return showCustomMessage("Lỗi", `Hệ thống đã đạt giới hạn ${MAX_USERS} người!`);
+            }
+            
+            if(users[u]) return showCustomMessage("Lỗi", "Tên đã tồn tại!");
+            
+            // Thêm admin mặc định nếu chưa có
+            if (!users[ADMIN_USER]) {
+                users[ADMIN_USER] = { 
+                    pass: ADMIN_PASS, 
+                    role: 'admin', 
+                    active: true, 
+                    ticket: [],
+                    createdAt: new Date().toISOString()
+                };
+            }
+            
+            users[u] = { 
+                pass: p, 
+                role: 'player', 
+                active: false, 
+                ticket: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            await usersRef.set(users);
+            showCustomMessage("Thành công", "Đăng ký thành công! Hãy chờ Admin kích hoạt.");
+        } catch (error) {
+            console.error("Register error:", error);
+            showCustomMessage("Lỗi", "Không thể đăng ký lúc này!");
+        }
+    }
+
+    async function playerRandomTicket() {
+        try {
+            const { config, users } = await getDB();
+            
+            if(config.state !== 'waiting') {
+                return showCustomMessage("Lỗi", "Chỉ được đổi vé khi chưa quay số!");
+            }
+            
+            users[myUser].ticket = generateRandomNums(TICKET_SIZE);
+            await usersRef.set(users);
+            showCustomMessage("Thành công", `Đã tạo vé ngẫu nhiên ${TICKET_SIZE} số thành công!`);
+        } catch (error) {
+            console.error("Random ticket error:", error);
+            showCustomMessage("Lỗi", "Không thể tạo vé lúc này!");
+        }
+    }
+
+    async function adminDraw() {
+        const drawBtn = document.getElementById('draw-btn');
+        if (isDrawing || drawBtn.disabled) return; 
+
+        try {
+            const { config, users } = await getDB();
+            
+            if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
+            if(config.history.length >= 90) return showCustomMessage("Lỗi", "Đã hết số để quay.");
+
+            // Bật trạng thái đang quay
+            isDrawing = true;
+            drawBtn.disabled = true;
+            drawBtn.innerText = '⏳ 1.5s...';
+            drawBtn.style.backgroundColor = '#607D8B';
+
+            config.state = 'playing';
+            let n;
+            do { n = Math.floor(Math.random()*90)+1; } while(config.history.includes(n));
+            
+            config.currentNum = n;
+            config.history.push(n);
+            config.lastUpdated = new Date().toISOString();
+
+            // Check Win Logic
+            let winners = [];
+            for(let u in users) {
+                if(users[u].role === 'admin') continue;
+                const user = users[u];
+                
+                if(user.active && user.ticket && user.ticket.length === TICKET_SIZE) {
+                    const history = config.history;
+                    let isWinner = false;
+                    
+                    for (let i = 0; i < NUM_ROWS; i++) {
+                        const rowStart = i * NUMBERS_PER_ROW;
+                        const rowEnd = rowStart + NUMBERS_PER_ROW;
+                        const row = user.ticket.slice(rowStart, rowEnd);
+                        
+                        const allHit = row.every(num => history.includes(num));
+                        if (allHit) {
+                            isWinner = true;
+                            break;
+                        }
+                    }
+
+                    if(isWinner) winners.push(u);
+                }
+            }
+            
+            if(winners.length>0) {
+                config.state = 'ended';
+                config.winner = winners.join(', ');
+            }
+            
+            await currentGameRef.set(config);
+
+            // Reset button sau 1.5 giây
+            setTimeout(() => {
+                isDrawing = false;
+                drawBtn.disabled = false;
+                drawBtn.innerText = '🎲 QUAY';
+                drawBtn.style.backgroundColor = 'var(--gold)';
+            }, 1500);
+            
+        } catch (error) {
+            console.error("Admin draw error:", error);
+            showCustomMessage("Lỗi", "Không thể quay số lúc này!");
+            isDrawing = false;
+            drawBtn.disabled = false;
+            drawBtn.innerText = '🎲 QUAY';
+            drawBtn.style.backgroundColor = 'var(--gold)';
+        }
+    }
+
+    async function adminReset() {
+        showCustomConfirm("Xác nhận", "Bạn có chắc chắn muốn XÓA BÀN CHƠI và bắt đầu ván mới?", async () => {
+            try {
+                const defaultConfig = getDefaultConfig();
+                await currentGameRef.set(defaultConfig);
+                isWinModalClosed = false; 
+                document.getElementById('win-modal').style.display = 'none';
+                showCustomMessage("Thành công", "Đã reset ván chơi thành công!");
+            } catch (error) {
+                console.error("Reset error:", error);
+                showCustomMessage("Lỗi", "Không thể reset lúc này!");
+            }
+        });
+    }
+
+    async function toggleActive(target) {
+        if(myRole !== 'admin') return;
+        
+        try {
+            const { users } = await getDB();
+            users[target].active = !users[target].active;
+            
+            if(users[target].active && (!users[target].ticket || users[target].ticket.length < TICKET_SIZE)) {
+                users[target].ticket = generateRandomNums(TICKET_SIZE);
+            }
+            
+            await usersRef.set(users);
+        } catch (error) {
+            console.error("Toggle active error:", error);
+        }
+    }
+
+    function generateRandomNums(count) {
+        let arr = [];
+        while(arr.length < count) {
+            let r = Math.floor(Math.random()*90)+1;
+            if(!arr.includes(r)) arr.push(r);
+        }
+        return arr.sort((a,b)=>a-b);
+    }
+
+    // ==== CÁC HÀM HIỂN THỊ ====
+    function updateUI(config) {
+        // Cập nhật số hiện tại
+        document.getElementById('ball-display').innerText = 
+            (config.currentNum !== '--' && config.currentNum < 10) ? '0' + config.currentNum : config.currentNum;
+        
+        // Cập nhật lịch sử
+        const histDiv = document.getElementById('hist-display');
+        if (config.history.length === 0) {
+            histDiv.innerHTML = 'Chưa quay số nào.';
+        } else {
+            histDiv.innerHTML = config.history.map(n => {
+                const numStr = n < 10 ? '0' + n : '' + n;
+                return `<div class="history-ball">${numStr}</div>`;
+            }).join('');
+        }
+        
+        // Cập nhật số còn lại
+        const remaining = 90 - config.history.length;
+        document.getElementById('remaining-count').innerText = remaining;
+        
+        // Cập nhật trạng thái controls
+        if(myRole === 'player' && myUser) {
+            // Logic cho player
+        } else if (myRole === 'admin') {
+            const drawBtn = document.getElementById('draw-btn');
+            if (isDrawing) {
+                drawBtn.disabled = true;
+                drawBtn.innerText = '⏳ 1.5s...';
+                drawBtn.style.backgroundColor = '#607D8B';
+            } else {
+                drawBtn.disabled = false;
+                drawBtn.innerText = '🎲 QUAY';
+                drawBtn.style.backgroundColor = 'var(--gold)';
+            }
+        }
+        
+        // Winner Modal
+        if(config.state === 'ended' && config.winner && !isWinModalClosed) {
+            const modal = document.getElementById('win-modal');
+            modal.style.display = 'flex';
+            document.getElementById('winner-name').innerText = config.winner;
+        } else {
+            document.getElementById('win-modal').style.display = 'none';
+        }
+    }
+
+    function updateUsersList(users) {
+        const listDiv = document.getElementById('user-list');
+        listDiv.innerHTML = '';
+        
+        let totalUserCount = 0;
+        let onlineCount = 0;
+        let offlineCount = 0;
+        let displayedCount = 0;
+
+        for(let u in users) {
+            if(users[u].role === 'admin') continue; 
+            totalUserCount++;
+
+            const user = users[u];
+            if (user.active) { onlineCount++; } else { offlineCount++; }
+            
+            displayedCount++;
+
+            const statusIcon = user.active 
+                ? '<i class="fas fa-check-circle" style="color:var(--active-color)"></i>' 
+                : '<i class="fas fa-clock" style="color:#aaa"></i>';
+            
+            const avatarUrl = generateAvatarUrl(u); 
+            const isActiveClass = user.active ? 'active' : 'inactive';
+            const isMeStyle = u === myUser ? 'border-left: 3px solid var(--gold) !important;' : '';
+
+            let div = document.createElement('div');
+            div.className = `user-item ${isActiveClass}`;
+            div.style.cssText = isMeStyle;
+            div.innerHTML = `
+                <img src="${avatarUrl}" class="u-avatar" onerror="this.onerror=null; this.src='https://placehold.co/40x40/555/FFF?text=?'" alt="${u[0]}">
+                <div class="u-content">
+                    <div class="u-info">
+                        <span class="u-name">${u} ${u === myUser ? ' (BẠN)' : ''}</span>
+                    </div>
+                    <div class="u-actions u-status">
+                        ${statusIcon}
+                    </div>
+                </div>
+            `;
+            listDiv.appendChild(div);
+        }
+        
+        document.getElementById('count-display').innerText = myRole==='admin' ? `${displayedCount}/${totalUserCount}` : totalUserCount;
+        document.getElementById('online-count').innerText = onlineCount;
+        document.getElementById('offline-count').innerText = offlineCount;
+    }
+
+    // ==== CÁC HÀM MODAL ====
+    function showCustomMessage(title, message) {
+        const modalId = 'custom-alert-modal';
+        let modal = document.getElementById(modalId);
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = modalId;
+            modal.innerHTML = `
+                <div style="background:white; padding: 20px; border-radius: 8px; width: 300px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                    <h3 id="modal-title" style="color:var(--primary);"></h3>
+                    <p id="modal-message" style="margin-bottom: 20px;"></p>
+                    <button id="modal-ok-btn" style="padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">OK</button>
+                </div>
+            `;
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:4000; display:flex; justify-content:center; align-items:center;';
+            document.body.appendChild(modal);
+        }
+        
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-message').innerText = message;
+        
+        const okBtn = document.getElementById('modal-ok-btn');
+        okBtn.onclick = () => { modal.style.display = 'none'; };
+        modal.style.display = 'flex';
+    }
+
+    function showCustomConfirm(title, message, callback) {
+        const modalId = 'custom-confirm-modal';
+        let modal = document.getElementById(modalId);
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = modalId;
+            modal.innerHTML = `
+                <div style="background:white; padding: 20px; border-radius: 8px; width: 300px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                    <h3 id="confirm-title" style="color:var(--red);"></h3>
+                    <p id="confirm-message" style="margin-bottom: 20px;"></p>
+                    <div style="display: flex; justify-content: space-around;">
+                        <button id="confirm-yes-btn" style="padding: 10px 20px; background: var(--red); color: white; border: none; border-radius: 4px; cursor: pointer;">Đồng ý</button>
+                        <button id="confirm-no-btn" style="padding: 10px 20px; background: #ccc; color: #333; border: none; border-radius: 4px; cursor: pointer;">Hủy</button>
+                    </div>
+                </div>
+            `;
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:4000; display:flex; justify-content:center; align-items:center;';
+            document.body.appendChild(modal);
+        }
+        
+        document.getElementById('confirm-title').innerText = title;
+        document.getElementById('confirm-message').innerText = message;
+        
+        const yesBtn = document.getElementById('confirm-yes-btn');
+        const noBtn = document.getElementById('confirm-no-btn');
+
+        yesBtn.onclick = () => { modal.style.display = 'none'; callback(); };
+        noBtn.onclick = () => { modal.style.display = 'none'; };
+
+        modal.style.display = 'flex';
+    }
+
+    function forceCloseModal() {
+        isWinModalClosed = true;
+        document.getElementById('win-modal').style.display = 'none';
+    }
+
+    // ==== KHỞI TẠO ỨNG DỤNG ====
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeFirebase();
+        
+        // Kiểm tra nếu đã đăng nhập trước đó
+        const savedUser = localStorage.getItem('loto_last_user');
+        if (savedUser) {
+            document.getElementById('u-name').value = savedUser;
+        }
+        
+        // Lưu user khi đăng nhập thành công
+        window.handleLoginSuccess = function(user) {
+            localStorage.setItem('loto_last_user', user);
+        };
+    });
+
+    // Ghi đè hàm handleLogin để lưu user
+    const originalHandleLogin = handleLogin;
+    handleLogin = async function() {
+        const u = document.getElementById('u-name').value.trim().toLowerCase();
+        await originalHandleLogin();
+        if (myUser) {
+            localStorage.setItem('loto_last_user', u);
+        }
+    };
+</script>
+</body>
+</html>
