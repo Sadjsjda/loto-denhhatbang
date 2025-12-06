@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 
@@ -268,34 +267,30 @@
 </head>
 <body>
 
-    <!-- THAY THẾ CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY -->
     <script>
-        // ==== THAY CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY ====
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        // ==== CẤU HÌNH FIREBASE - NAMESPACED V3 (ĐÃ SỬA) ====
+        const firebaseConfig = {
+          apiKey: "AIzaSyDEWU05dRRqhyb_CrS1QrU7vrvYTaituGI",
+          authDomain: "loto-denhatbang.firebaseapp.com",
+          projectId: "loto-denhatbang",
+          storageBucket: "loto-denhatbang.firebasestorage.app",
+          messagingSenderId: "642753941588",
+          appId: "1:642753941588:web:85457c78cc65bfcdfa1dc1",
+          measurementId: "G-1J2N59LHJF",
+          // Bổ sung: URL của Realtime Database (Nên thêm nếu không phải là URL mặc định)
+          databaseURL: "https://loto-denhatbang-default-rtdb.firebaseio.com" 
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDEWU05dRRqhyb_CrS1QrU7vrvYTaituGI",
-  authDomain: "loto-denhatbang.firebaseapp.com",
-  projectId: "loto-denhatbang",
-  storageBucket: "loto-denhatbang.firebasestorage.app",
-  messagingSenderId: "642753941588",
-  appId: "1:642753941588:web:85457c78cc65bfcdfa1dc1",
-  measurementId: "G-1J2N59LHJF"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        
-        // Khởi tạo Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Khởi tạo Firebase và Database
+        if (typeof firebase !== 'undefined') {
+            const app = firebase.initializeApp(firebaseConfig);
+            // Không cần getAnalytics nếu không dùng
+            const database = firebase.database();
+            // Gán biến database ra global scope để các hàm khác trong file có thể sử dụng
+            window.database = database; 
+        } else {
+            console.error("Firebase SDK chưa được tải. Vui lòng kiểm tra các thẻ <script> CDN.");
+        }
     </script>
 
     <div id="login-modal">
@@ -440,36 +435,49 @@ const analytics = getAnalytics(app);
     let isDrawing = false;
     let currentGameRef = null;
     let usersRef = null;
+    
+    // Lưu trữ local copy của users và config để tránh gọi API quá nhiều
+    let currentConfig = getDefaultConfig();
+    let currentUsers = {};
 
     // ==== FIREBASE FUNCTIONS ====
     function initializeFirebase() {
-        currentGameRef = database.ref('currentGame');
-        usersRef = database.ref('users');
+        if (!window.database) {
+            console.error("Database object not initialized. Check Firebase config script.");
+            return;
+        }
         
-        // Lắng nghe thay đổi từ Firebase
+        currentGameRef = window.database.ref('currentGame');
+        usersRef = window.database.ref('users');
+        
+        // Lắng nghe thay đổi CONFIG từ Firebase (Real-time update)
         currentGameRef.on('value', (snapshot) => {
             const gameData = snapshot.val();
             if (gameData) {
-                updateUI(gameData);
+                currentConfig = gameData;
+                renderUI(); // Chỉ render UI sau khi có dữ liệu config mới
+                updateUI(currentConfig); // Cập nhật các thành phần đơn giản
             }
         });
         
+        // Lắng nghe thay đổi USERS từ Firebase (Real-time update)
         usersRef.on('value', (snapshot) => {
             const usersData = snapshot.val();
             if (usersData) {
-                updateUsersList(usersData);
+                currentUsers = usersData;
+                updateUsersList(currentUsers); // Chỉ cập nhật danh sách user
+                renderUI(); // Render lại stage để update vé và trạng thái chờ
             }
         });
         
         // Theo dõi trạng thái kết nối
-        database.ref('.info/connected').on('value', (snapshot) => {
+        window.database.ref('.info/connected').on('value', (snapshot) => {
             const statusEl = document.getElementById('connection-status');
             if (snapshot.val() === true) {
                 statusEl.textContent = '🟢 Đã kết nối';
                 statusEl.className = 'connection-status connected';
                 statusEl.classList.remove('hidden');
                 
-                // Ẩn thông báo sau 3 giây
                 setTimeout(() => {
                     statusEl.classList.add('hidden');
                 }, 3000);
@@ -481,24 +489,12 @@ const analytics = getAnalytics(app);
         });
     }
 
+    // Hàm lấy toàn bộ DB (Chỉ dùng khi cần lấy dữ liệu một lần, ưu tiên dùng currentConfig/currentUsers)
     function getDB() {
-        return new Promise((resolve) => {
-            Promise.all([
-                new Promise(resolve => currentGameRef.once('value', snapshot => resolve(snapshot.val()))),
-                new Promise(resolve => usersRef.once('value', snapshot => resolve(snapshot.val())))
-            ]).then(([config, users]) => {
-                resolve({ config: config || getDefaultConfig(), users: users || {} });
-            });
-        });
+        return { config: currentConfig, users: currentUsers };
     }
 
-    function saveDB(data) {
-        return Promise.all([
-            currentGameRef.set(data.config),
-            usersRef.set(data.users)
-        ]);
-    }
-
+    // Hàm set default config (cần thiết khi reset)
     function getDefaultConfig() {
         return { 
             state: 'waiting', 
@@ -523,7 +519,7 @@ const analytics = getAnalytics(app);
         const p = document.getElementById('u-pass').value.trim();
         
         try {
-            const { users } = await getDB();
+            const users = currentUsers; // Dùng bản copy local
             
             if(users[u] && users[u].pass === p) {
                 myUser = u; 
@@ -539,6 +535,12 @@ const analytics = getAnalytics(app);
                     document.getElementById('player-controls').classList.remove('hidden');
                     if (roleBadge) roleBadge.innerText = '[ME]';
                 }
+                
+                // Lưu user đã đăng nhập
+                localStorage.setItem('loto_last_user', u);
+                
+                // Cập nhật giao diện lần cuối sau khi login
+                renderUI(); 
             } else { 
                 showCustomMessage("Đăng nhập thất bại", "Sai tên hoặc mật khẩu!"); 
             }
@@ -556,7 +558,7 @@ const analytics = getAnalytics(app);
         if(u === ADMIN_USER) return showCustomMessage("Lỗi", "Tên này đã được sử dụng!");
         
         try {
-            const { users } = await getDB();
+            let users = { ...currentUsers }; // Sao chép bản local
             
             if(Object.keys(users).length >= MAX_USERS) {
                 return showCustomMessage("Lỗi", `Hệ thống đã đạt giới hạn ${MAX_USERS} người!`);
@@ -564,7 +566,7 @@ const analytics = getAnalytics(app);
             
             if(users[u]) return showCustomMessage("Lỗi", "Tên đã tồn tại!");
             
-            // Thêm admin mặc định nếu chưa có
+            // Đảm bảo Admin user tồn tại
             if (!users[ADMIN_USER]) {
                 users[ADMIN_USER] = { 
                     pass: ADMIN_PASS, 
@@ -583,7 +585,7 @@ const analytics = getAnalytics(app);
                 createdAt: new Date().toISOString()
             };
             
-            await usersRef.set(users);
+            await usersRef.set(users); // Ghi lên Firebase
             showCustomMessage("Thành công", "Đăng ký thành công! Hãy chờ Admin kích hoạt.");
         } catch (error) {
             console.error("Register error:", error);
@@ -593,19 +595,26 @@ const analytics = getAnalytics(app);
 
     async function playerRandomTicket() {
         try {
-            const { config, users } = await getDB();
+            const config = currentConfig;
             
             if(config.state !== 'waiting') {
                 return showCustomMessage("Lỗi", "Chỉ được đổi vé khi chưa quay số!");
             }
             
-            users[myUser].ticket = generateRandomNums(TICKET_SIZE);
-            await usersRef.set(users);
+            // Cần cập nhật riêng user hiện tại thay vì ghi toàn bộ list users
+            const newTicket = generateRandomNums(TICKET_SIZE);
+            await usersRef.child(myUser).child('ticket').set(newTicket);
+            
             showCustomMessage("Thành công", `Đã tạo vé ngẫu nhiên ${TICKET_SIZE} số thành công!`);
         } catch (error) {
             console.error("Random ticket error:", error);
             showCustomMessage("Lỗi", "Không thể tạo vé lúc này!");
         }
+    }
+    
+    // (Đã ẩn)
+    function playerManualTicket() {
+        showCustomMessage("Lỗi", "Chọn số thủ công cho vé 18 số đã bị tắt. Vui lòng sử dụng nút 'ĐỔI NGẪU NHIÊN 18 SỐ'.");
     }
 
     async function adminDraw() {
@@ -613,8 +622,9 @@ const analytics = getAnalytics(app);
         if (isDrawing || drawBtn.disabled) return; 
 
         try {
-            const { config, users } = await getDB();
-            
+            let config = { ...currentConfig }; // Sao chép config local
+            const users = currentUsers; // Dùng users local
+
             if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
             if(config.history.length >= 90) return showCustomMessage("Lỗi", "Đã hết số để quay.");
 
@@ -663,7 +673,7 @@ const analytics = getAnalytics(app);
                 config.winner = winners.join(', ');
             }
             
-            await currentGameRef.set(config);
+            await currentGameRef.set(config); // Ghi config mới lên Firebase
 
             // Reset button sau 1.5 giây
             setTimeout(() => {
@@ -687,7 +697,7 @@ const analytics = getAnalytics(app);
         showCustomConfirm("Xác nhận", "Bạn có chắc chắn muốn XÓA BÀN CHƠI và bắt đầu ván mới?", async () => {
             try {
                 const defaultConfig = getDefaultConfig();
-                await currentGameRef.set(defaultConfig);
+                await currentGameRef.set(defaultConfig); // Ghi default config lên Firebase
                 isWinModalClosed = false; 
                 document.getElementById('win-modal').style.display = 'none';
                 showCustomMessage("Thành công", "Đã reset ván chơi thành công!");
@@ -702,19 +712,53 @@ const analytics = getAnalytics(app);
         if(myRole !== 'admin') return;
         
         try {
-            const { users } = await getDB();
+            const users = { ...currentUsers };
             users[target].active = !users[target].active;
             
             if(users[target].active && (!users[target].ticket || users[target].ticket.length < TICKET_SIZE)) {
                 users[target].ticket = generateRandomNums(TICKET_SIZE);
             }
             
-            await usersRef.set(users);
+            // Cập nhật trạng thái và ticket của user cụ thể lên Firebase
+            await usersRef.child(target).update({ 
+                active: users[target].active,
+                ticket: users[target].ticket 
+            });
+            
+            renderUserManagementList(); // Cập nhật danh sách quản lý
         } catch (error) {
             console.error("Toggle active error:", error);
         }
     }
+    
+    async function resetUserPassword(target) {
+        if(myRole !== 'admin') return;
+        showCustomConfirm("Xác nhận Reset Mật khẩu", `Bạn có chắc muốn đặt lại mật khẩu của user "${target}" thành "${DEFAULT_PLAYER_PASS}"?`, async () => {
+            try {
+                await usersRef.child(target).child('pass').set(DEFAULT_PLAYER_PASS);
+                showCustomMessage("Thành công", `Mật khẩu của ${target} đã được đặt lại thành ${DEFAULT_PLAYER_PASS}`);
+                renderUserManagementList();
+            } catch (error) {
+                console.error("Reset password error:", error);
+                showCustomMessage("Lỗi", "Không thể reset mật khẩu lúc này!");
+            }
+        });
+    }
 
+    async function deleteUserWrapper(u) {
+        if(myRole !== 'admin') return;
+        showCustomConfirm("Xác nhận Xóa", `Bạn có chắc muốn XÓA VĨNH VIỄN user: ${u}?`, async () => {
+            try {
+                await usersRef.child(u).remove();
+                showCustomMessage("Thành công", `User ${u} đã được xóa.`);
+                renderUserManagementList(); 
+            } catch (error) {
+                console.error("Delete user error:", error);
+                showCustomMessage("Lỗi", "Không thể xóa user lúc này!");
+            }
+        });
+    }
+    
     function generateRandomNums(count) {
         let arr = [];
         while(arr.length < count) {
@@ -723,8 +767,104 @@ const analytics = getAnalytics(app);
         }
         return arr.sort((a,b)=>a-b);
     }
+    
+    function openAdminManageModal() {
+        if(myRole !== 'admin') return;
+        document.getElementById('admin-manage-modal').style.display = 'flex';
+        renderUserManagementList();
+    }
+    
+    function renderUserManagementList() {
+        if (myRole !== 'admin') return;
 
-    // ==== CÁC HÀM HIỂN THỊ ====
+        const users = currentUsers;
+        const listDiv = document.getElementById('admin-user-management-list');
+        listDiv.innerHTML = '';
+        let hasUsers = false;
+
+        for(let u in users) {
+            if(users[u].role === 'admin') continue; 
+            hasUsers = true;
+            const user = users[u];
+            const avatarUrl = generateAvatarUrl(u);
+
+            const item = document.createElement('div');
+            item.className = 'manage-list-item';
+            item.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${avatarUrl}" class="u-avatar" onerror="this.onerror=null; this.src='https://placehold.co/40x40/555/FFF?text=?'" alt="${u[0]}">
+                    <div style="font-size:14px; color:#333;">
+                        <span style="font-weight:bold;">${u}</span>
+                                    </div>
+                </div>
+                <div class="manage-controls">
+                    <button class="btn-reset-pass" onclick="resetUserPassword('${u}')">RESET PASS</button>
+                    <label class="switch" title="Kích hoạt/Vô hiệu hóa">
+                        <input type="checkbox" ${user.active?'checked':''} onchange="toggleActive('${u}');">
+                        <span class="slider"></span>
+                    </label>
+                    <button class="btn-icon btn-del" style="color:#E53935;" onclick="deleteUserWrapper('${u}')" title="Xóa User">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            listDiv.appendChild(item);
+        }
+        
+        if (!hasUsers) {
+             listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:30px;">Chưa có người dùng nào đăng ký.</p>';
+        }
+    }
+
+    // Xuất Excel
+    function exportUsersToExcel() {
+        if (myRole !== 'admin') {
+            showCustomMessage("Lỗi", "Bạn không có quyền thực hiện chức năng này.");
+            return;
+        }
+        
+        if (typeof XLSX === 'undefined') {
+            showCustomMessage("Lỗi", "Thư viện Excel chưa được tải xong.");
+            return;
+        }
+
+        const users = currentUsers;
+        const usersData = [];
+
+        for (const u in users) {
+            if (users[u].role === 'admin') continue;
+            
+            usersData.push({
+                'Tên Đăng Nhập (User)': u,
+                'Mật Khẩu (Pass)': users[u].pass 
+            });
+        }
+
+        if (usersData.length === 0) {
+            showCustomMessage("Lỗi", "Không có người dùng nào để xuất.");
+            return;
+        }
+
+        const worksheet = XLSX.utils.json_to_sheet(usersData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "User_Passwords");
+
+        const wscols = [
+            { wch: 25 }, 
+            { wch: 25 }  
+        ];
+        worksheet['!cols'] = wscols;
+
+        try {
+            XLSX.writeFile(workbook, "DanhSachUser_Pass_DenNhatBang.xlsx");
+            showCustomMessage("Thành công", "Đã xuất file Excel thành công!");
+        } catch (e) {
+            showCustomMessage("Lỗi", "Không thể xuất file. Vui lòng kiểm tra quyền của trình duyệt.");
+            console.error("Lỗi xuất Excel:", e);
+        }
+    }
+
+    // ==== CÁC HÀM HIỂN THỊ CHUNG ====
     function updateUI(config) {
         // Cập nhật số hiện tại
         document.getElementById('ball-display').innerText = 
@@ -745,10 +885,8 @@ const analytics = getAnalytics(app);
         const remaining = 90 - config.history.length;
         document.getElementById('remaining-count').innerText = remaining;
         
-        // Cập nhật trạng thái controls
-        if(myRole === 'player' && myUser) {
-            // Logic cho player
-        } else if (myRole === 'admin') {
+        // Cập nhật trạng thái controls cho ADMIN
+        if (myRole === 'admin') {
             const drawBtn = document.getElementById('draw-btn');
             if (isDrawing) {
                 drawBtn.disabled = true;
@@ -769,12 +907,43 @@ const analytics = getAnalytics(app);
         } else {
             document.getElementById('win-modal').style.display = 'none';
         }
+        
+        // Cập nhật trạng thái controls cho PLAYER
+        if(myRole === 'player' && myUser) {
+            const userIsActive = currentUsers[myUser] && currentUsers[myUser].active;
+            
+            if(!userIsActive) {
+                document.getElementById('waiting-approval').classList.remove('hidden');
+                document.getElementById('player-controls').classList.add('hidden');
+            } else {
+                document.getElementById('waiting-approval').classList.add('hidden');
+                document.getElementById('player-controls').classList.remove('hidden');
+                
+                if(config.state === 'waiting') {
+                    document.getElementById('ticket-editor').classList.remove('hidden');
+                    document.getElementById('ticket-locked').classList.add('hidden');
+                } else {
+                    document.getElementById('ticket-editor').classList.add('hidden');
+                    document.getElementById('ticket-locked').classList.remove('hidden');
+                }
+            }
+        }
     }
 
     function updateUsersList(users) {
         const listDiv = document.getElementById('user-list');
         listDiv.innerHTML = '';
         
+        let searchText = "";
+        let filterVal = "all";
+        
+        if(myRole === 'admin') {
+            const searchInput = document.getElementById('search-inp');
+            const filterSelect = document.getElementById('filter-select');
+            if (searchInput) searchText = searchInput.value.toLowerCase();
+            if (filterSelect) filterVal = filterSelect.value;
+        }
+
         let totalUserCount = 0;
         let onlineCount = 0;
         let offlineCount = 0;
@@ -787,6 +956,12 @@ const analytics = getAnalytics(app);
             const user = users[u];
             if (user.active) { onlineCount++; } else { offlineCount++; }
             
+            if(myRole === 'admin') {
+                if(searchText && !u.includes(searchText)) continue;
+                if(filterVal === 'active' && !user.active) continue;
+                if(filterVal === 'inactive' && user.active) continue;
+            } 
+
             displayedCount++;
 
             const statusIcon = user.active 
@@ -819,7 +994,88 @@ const analytics = getAnalytics(app);
         document.getElementById('offline-count').innerText = offlineCount;
     }
 
-    // ==== CÁC HÀM MODAL ====
+    // Hàm render chính, vẽ lại stage tickets
+    function renderUI() {
+        const config = currentConfig;
+        const users = currentUsers;
+        
+        // 1. Cập nhật các thành phần đơn giản trước
+        updateUI(config);
+        
+        // 2. Cập nhật Main Stage (Tickets - ĐÃ CẬP NHẬT CHO 3x6)
+        const stage = document.getElementById('stage');
+        // Xóa tất cả các thẻ vé cũ, trừ thẻ chờ duyệt
+        const existingCards = Array.from(stage.children).filter(c => c.id !== 'waiting-approval');
+        existingCards.forEach(c => stage.removeChild(c));
+
+        const usersToDisplay = Object.keys(users)
+            .filter(u => users[u].role !== 'admin')
+            .filter(u => users[u].active && users[u].ticket && users[u].ticket.length === TICKET_SIZE);
+        
+        usersToDisplay.forEach(u => {
+            const user = users[u];
+            let completedRows = 0;
+            let cellsHTML = '';
+            let statusFooterHTML = '';
+            const history = config.history;
+            
+            // Render 6 hàng (i = 0 đến 5)
+            for (let i = 0; i < NUM_ROWS; i++) {
+                const rowStart = i * NUMBERS_PER_ROW; 
+                const rowEnd = rowStart + NUMBERS_PER_ROW; 
+                const row = user.ticket.slice(rowStart, rowEnd);
+                
+                let rowHits = 0;
+                let rowHTML = '';
+                let missingNumber = null;
+
+                row.forEach(n => {
+                    const isHit = history.includes(n);
+                    if(isHit) rowHits++;
+                    if(!isHit && missingNumber === null) missingNumber = n; // Lấy số đầu tiên bị thiếu
+                    const numStr = n < 10 ? '0' + n : '' + n;
+                    rowHTML += `<div class="t-cell ${isHit?'hit':''}">${numStr}</div>`;
+                });
+                
+                if (rowHits === NUMBERS_PER_ROW) {
+                    completedRows++;
+                }
+
+                cellsHTML += rowHTML;
+                
+                // Hiển thị trạng thái chờ nếu hàng trúng 2/3
+                if (rowHits === NUMBERS_PER_ROW - 1 && config.state !== 'ended' && !statusFooterHTML) { 
+                    statusFooterHTML = `
+                        <div class="status-footer pulse-wait" style="margin-top: 5px;">
+                            ĐANG CHỜ 
+                            <span class="ball-icon"></span>
+                            (${missingNumber < 10 ? '0' + missingNumber : missingNumber})
+                        </div>
+                    `;
+                }
+            }
+
+            const isWinner = (completedRows > 0); 
+            const card = document.createElement('div');
+            card.className = `ticket-card ${isWinner ? 'winner' : ''}`;
+            if (statusFooterHTML && config.state !== 'ended') {
+                card.classList.add('waiting-pulse');
+            }
+            if(u === myUser) card.style.borderTopColor = 'var(--gold)'; // Dùng gold để nổi bật vé của mình
+
+            card.innerHTML = `
+                <div class="t-header">
+                    <span>${u}</span>
+                    <span>${isWinner ? 'KINH!' : ''}</span> 
+                </div>
+                <div class="t-grid">${cellsHTML}</div>
+                ${statusFooterHTML}
+            `;
+            stage.appendChild(card);
+        });
+    }
+
+    // ==== CÁC HÀM MODAL HỖ TRỢ ====
     function showCustomMessage(title, message) {
         const modalId = 'custom-alert-modal';
         let modal = document.getElementById(modalId);
@@ -884,29 +1140,21 @@ const analytics = getAnalytics(app);
 
     // ==== KHỞI TẠO ỨNG DỤNG ====
     document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo Firebase
         initializeFirebase();
         
-        // Kiểm tra nếu đã đăng nhập trước đó
+        // Kiểm tra nếu đã đăng nhập trước đó và điền vào ô user
         const savedUser = localStorage.getItem('loto_last_user');
         if (savedUser) {
             document.getElementById('u-name').value = savedUser;
         }
         
-        // Lưu user khi đăng nhập thành công
-        window.handleLoginSuccess = function(user) {
-            localStorage.setItem('loto_last_user', user);
+        // Bind event cho nút Đăng nhập để lưu user
+        const originalHandleLogin = handleLogin;
+        handleLogin = async function() {
+            await originalHandleLogin();
         };
     });
-
-    // Ghi đè hàm handleLogin để lưu user
-    const originalHandleLogin = handleLogin;
-    handleLogin = async function() {
-        const u = document.getElementById('u-name').value.trim().toLowerCase();
-        await originalHandleLogin();
-        if (myUser) {
-            localStorage.setItem('loto_last_user', u);
-        }
-    };
 </script>
 </body>
 </html>
