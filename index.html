@@ -268,7 +268,9 @@
 <body>
 
     <script>
-        // ==== CẤU HÌNH FIREBASE - NAMESPACED V3 (ĐÃ SỬA) ====
+        // =================================================================
+        // ==== CẤU HÌNH FIREBASE ĐÃ SỬA LỖI databaseURL CHO REALTIME DB ====
+        // =================================================================
         const firebaseConfig = {
           apiKey: "AIzaSyDEWU05dRRqhyb_CrS1QrU7vrvYTaituGI",
           authDomain: "loto-denhatbang.firebaseapp.com",
@@ -277,17 +279,20 @@
           messagingSenderId: "642753941588",
           appId: "1:642753941588:web:85457c78cc65bfcdfa1dc1",
           measurementId: "G-1J2N59LHJF",
-          // Bổ sung: URL của Realtime Database (Nên thêm nếu không phải là URL mặc định)
-          databaseURL: "https://console.firebase.google.com/project/loto-denhatbang/database/loto-denhatbang-default-rtdb/data/ 
+          // ĐỊA CHỈ API ĐÚNG MỚI NHẤT BẠN CUNG CẤP (sử dụng khu vực asia-southeast1)
+          databaseURL: "https://loto-denhatbang-default-rtdb.asia-southeast1.firebasedatabase.app" 
         };
 
         // Khởi tạo Firebase và Database
         if (typeof firebase !== 'undefined') {
-            const app = firebase.initializeApp(firebaseConfig);
-            // Không cần getAnalytics nếu không dùng
-            const database = firebase.database();
-            // Gán biến database ra global scope để các hàm khác trong file có thể sử dụng
-            window.database = database; 
+            try {
+                const app = firebase.initializeApp(firebaseConfig);
+                const database = firebase.database();
+                window.database = database; 
+            } catch (e) {
+                console.error("Lỗi khi khởi tạo Firebase:", e);
+                // Hiển thị lỗi rõ hơn trên UI nếu có thể
+            }
         } else {
             console.error("Firebase SDK chưa được tải. Vui lòng kiểm tra các thẻ <script> CDN.");
         }
@@ -436,7 +441,6 @@
     let currentGameRef = null;
     let usersRef = null;
     
-    // Lưu trữ local copy của users và config để tránh gọi API quá nhiều
     let currentConfig = getDefaultConfig();
     let currentUsers = {};
 
@@ -447,26 +451,30 @@
             return;
         }
         
+        // Khởi tạo các tham chiếu
         currentGameRef = window.database.ref('currentGame');
         usersRef = window.database.ref('users');
         
-        // Lắng nghe thay đổi CONFIG từ Firebase (Real-time update)
+        // Lắng nghe thay đổi CONFIG từ Firebase
         currentGameRef.on('value', (snapshot) => {
             const gameData = snapshot.val();
             if (gameData) {
                 currentConfig = gameData;
-                renderUI(); // Chỉ render UI sau khi có dữ liệu config mới
                 updateUI(currentConfig); // Cập nhật các thành phần đơn giản
+                renderUI(); // Render stage tickets
             }
         });
         
-        // Lắng nghe thay đổi USERS từ Firebase (Real-time update)
+        // Lắng nghe thay đổi USERS từ Firebase
         usersRef.on('value', (snapshot) => {
             const usersData = snapshot.val();
             if (usersData) {
                 currentUsers = usersData;
-                updateUsersList(currentUsers); // Chỉ cập nhật danh sách user
+                updateUsersList(currentUsers); // Cập nhật danh sách user
                 renderUI(); // Render lại stage để update vé và trạng thái chờ
+            } else {
+                 // Nếu users rỗng, đảm bảo admin user được tạo lại
+                ensureAdminExists();
             }
         });
         
@@ -477,10 +485,7 @@
                 statusEl.textContent = '🟢 Đã kết nối';
                 statusEl.className = 'connection-status connected';
                 statusEl.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    statusEl.classList.add('hidden');
-                }, 3000);
+                setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
             } else {
                 statusEl.textContent = '🔴 Mất kết nối';
                 statusEl.className = 'connection-status disconnected';
@@ -489,12 +494,23 @@
         });
     }
 
-    // Hàm lấy toàn bộ DB (Chỉ dùng khi cần lấy dữ liệu một lần, ưu tiên dùng currentConfig/currentUsers)
-    function getDB() {
-        return { config: currentConfig, users: currentUsers };
+    async function ensureAdminExists() {
+        if (!usersRef) return;
+        
+        const adminSnapshot = await usersRef.child(ADMIN_USER).once('value');
+        if (!adminSnapshot.exists()) {
+            const defaultAdmin = { 
+                pass: ADMIN_PASS, 
+                role: 'admin', 
+                active: true, 
+                ticket: [],
+                createdAt: new Date().toISOString()
+            };
+            await usersRef.child(ADMIN_USER).set(defaultAdmin);
+            console.log("Admin user created/restored.");
+        }
     }
 
-    // Hàm set default config (cần thiết khi reset)
     function getDefaultConfig() {
         return { 
             state: 'waiting', 
@@ -519,7 +535,7 @@
         const p = document.getElementById('u-pass').value.trim();
         
         try {
-            const users = currentUsers; // Dùng bản copy local
+            const users = currentUsers;
             
             if(users[u] && users[u].pass === p) {
                 myUser = u; 
@@ -536,10 +552,7 @@
                     if (roleBadge) roleBadge.innerText = '[ME]';
                 }
                 
-                // Lưu user đã đăng nhập
                 localStorage.setItem('loto_last_user', u);
-                
-                // Cập nhật giao diện lần cuối sau khi login
                 renderUI(); 
             } else { 
                 showCustomMessage("Đăng nhập thất bại", "Sai tên hoặc mật khẩu!"); 
@@ -558,7 +571,7 @@
         if(u === ADMIN_USER) return showCustomMessage("Lỗi", "Tên này đã được sử dụng!");
         
         try {
-            let users = { ...currentUsers }; // Sao chép bản local
+            let users = currentUsers;
             
             if(Object.keys(users).length >= MAX_USERS) {
                 return showCustomMessage("Lỗi", `Hệ thống đã đạt giới hạn ${MAX_USERS} người!`);
@@ -566,18 +579,7 @@
             
             if(users[u]) return showCustomMessage("Lỗi", "Tên đã tồn tại!");
             
-            // Đảm bảo Admin user tồn tại
-            if (!users[ADMIN_USER]) {
-                users[ADMIN_USER] = { 
-                    pass: ADMIN_PASS, 
-                    role: 'admin', 
-                    active: true, 
-                    ticket: [],
-                    createdAt: new Date().toISOString()
-                };
-            }
-            
-            users[u] = { 
+            const newUser = { 
                 pass: p, 
                 role: 'player', 
                 active: false, 
@@ -585,7 +587,7 @@
                 createdAt: new Date().toISOString()
             };
             
-            await usersRef.set(users); // Ghi lên Firebase
+            await usersRef.child(u).set(newUser);
             showCustomMessage("Thành công", "Đăng ký thành công! Hãy chờ Admin kích hoạt.");
         } catch (error) {
             console.error("Register error:", error);
@@ -601,7 +603,6 @@
                 return showCustomMessage("Lỗi", "Chỉ được đổi vé khi chưa quay số!");
             }
             
-            // Cần cập nhật riêng user hiện tại thay vì ghi toàn bộ list users
             const newTicket = generateRandomNums(TICKET_SIZE);
             await usersRef.child(myUser).child('ticket').set(newTicket);
             
@@ -612,7 +613,6 @@
         }
     }
     
-    // (Đã ẩn)
     function playerManualTicket() {
         showCustomMessage("Lỗi", "Chọn số thủ công cho vé 18 số đã bị tắt. Vui lòng sử dụng nút 'ĐỔI NGẪU NHIÊN 18 SỐ'.");
     }
@@ -622,13 +622,12 @@
         if (isDrawing || drawBtn.disabled) return; 
 
         try {
-            let config = { ...currentConfig }; // Sao chép config local
-            const users = currentUsers; // Dùng users local
+            let config = { ...currentConfig };
+            const users = currentUsers;
 
             if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
             if(config.history.length >= 90) return showCustomMessage("Lỗi", "Đã hết số để quay.");
 
-            // Bật trạng thái đang quay
             isDrawing = true;
             drawBtn.disabled = true;
             drawBtn.innerText = '⏳ 1.5s...';
@@ -663,7 +662,6 @@
                             break;
                         }
                     }
-
                     if(isWinner) winners.push(u);
                 }
             }
@@ -697,7 +695,7 @@
         showCustomConfirm("Xác nhận", "Bạn có chắc chắn muốn XÓA BÀN CHƠI và bắt đầu ván mới?", async () => {
             try {
                 const defaultConfig = getDefaultConfig();
-                await currentGameRef.set(defaultConfig); // Ghi default config lên Firebase
+                await currentGameRef.set(defaultConfig);
                 isWinModalClosed = false; 
                 document.getElementById('win-modal').style.display = 'none';
                 showCustomMessage("Thành công", "Đã reset ván chơi thành công!");
@@ -712,20 +710,20 @@
         if(myRole !== 'admin') return;
         
         try {
-            const users = { ...currentUsers };
-            users[target].active = !users[target].active;
+            const user = currentUsers[target];
+            const newActiveState = !user.active;
+            let newTicket = user.ticket || [];
             
-            if(users[target].active && (!users[target].ticket || users[target].ticket.length < TICKET_SIZE)) {
-                users[target].ticket = generateRandomNums(TICKET_SIZE);
+            if(newActiveState && (!newTicket || newTicket.length < TICKET_SIZE)) {
+                newTicket = generateRandomNums(TICKET_SIZE);
             }
             
-            // Cập nhật trạng thái và ticket của user cụ thể lên Firebase
             await usersRef.child(target).update({ 
-                active: users[target].active,
-                ticket: users[target].ticket 
+                active: newActiveState,
+                ticket: newTicket 
             });
             
-            renderUserManagementList(); // Cập nhật danh sách quản lý
+            renderUserManagementList(); 
         } catch (error) {
             console.error("Toggle active error:", error);
         }
@@ -816,15 +814,9 @@
         }
     }
 
-    // Xuất Excel
     function exportUsersToExcel() {
-        if (myRole !== 'admin') {
-            showCustomMessage("Lỗi", "Bạn không có quyền thực hiện chức năng này.");
-            return;
-        }
-        
-        if (typeof XLSX === 'undefined') {
-            showCustomMessage("Lỗi", "Thư viện Excel chưa được tải xong.");
+        if (myRole !== 'admin' || typeof XLSX === 'undefined') {
+            showCustomMessage("Lỗi", "Bạn không có quyền hoặc thư viện chưa sẵn sàng.");
             return;
         }
 
@@ -849,28 +841,21 @@
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "User_Passwords");
 
-        const wscols = [
-            { wch: 25 }, 
-            { wch: 25 }  
-        ];
+        const wscols = [{ wch: 25 }, { wch: 25 }];
         worksheet['!cols'] = wscols;
 
         try {
             XLSX.writeFile(workbook, "DanhSachUser_Pass_DenNhatBang.xlsx");
             showCustomMessage("Thành công", "Đã xuất file Excel thành công!");
         } catch (e) {
-            showCustomMessage("Lỗi", "Không thể xuất file. Vui lòng kiểm tra quyền của trình duyệt.");
-            console.error("Lỗi xuất Excel:", e);
+            showCustomMessage("Lỗi", "Không thể xuất file.");
         }
     }
 
-    // ==== CÁC HÀM HIỂN THỊ CHUNG ====
     function updateUI(config) {
-        // Cập nhật số hiện tại
         document.getElementById('ball-display').innerText = 
             (config.currentNum !== '--' && config.currentNum < 10) ? '0' + config.currentNum : config.currentNum;
         
-        // Cập nhật lịch sử
         const histDiv = document.getElementById('hist-display');
         if (config.history.length === 0) {
             histDiv.innerHTML = 'Chưa quay số nào.';
@@ -881,11 +866,9 @@
             }).join('');
         }
         
-        // Cập nhật số còn lại
         const remaining = 90 - config.history.length;
         document.getElementById('remaining-count').innerText = remaining;
         
-        // Cập nhật trạng thái controls cho ADMIN
         if (myRole === 'admin') {
             const drawBtn = document.getElementById('draw-btn');
             if (isDrawing) {
@@ -899,7 +882,6 @@
             }
         }
         
-        // Winner Modal
         if(config.state === 'ended' && config.winner && !isWinModalClosed) {
             const modal = document.getElementById('win-modal');
             modal.style.display = 'flex';
@@ -908,7 +890,6 @@
             document.getElementById('win-modal').style.display = 'none';
         }
         
-        // Cập nhật trạng thái controls cho PLAYER
         if(myRole === 'player' && myUser) {
             const userIsActive = currentUsers[myUser] && currentUsers[myUser].active;
             
@@ -994,17 +975,13 @@
         document.getElementById('offline-count').innerText = offlineCount;
     }
 
-    // Hàm render chính, vẽ lại stage tickets
     function renderUI() {
         const config = currentConfig;
         const users = currentUsers;
         
-        // 1. Cập nhật các thành phần đơn giản trước
         updateUI(config);
         
-        // 2. Cập nhật Main Stage (Tickets - ĐÃ CẬP NHẬT CHO 3x6)
         const stage = document.getElementById('stage');
-        // Xóa tất cả các thẻ vé cũ, trừ thẻ chờ duyệt
         const existingCards = Array.from(stage.children).filter(c => c.id !== 'waiting-approval');
         existingCards.forEach(c => stage.removeChild(c));
 
@@ -1019,7 +996,6 @@
             let statusFooterHTML = '';
             const history = config.history;
             
-            // Render 6 hàng (i = 0 đến 5)
             for (let i = 0; i < NUM_ROWS; i++) {
                 const rowStart = i * NUMBERS_PER_ROW; 
                 const rowEnd = rowStart + NUMBERS_PER_ROW; 
@@ -1032,7 +1008,7 @@
                 row.forEach(n => {
                     const isHit = history.includes(n);
                     if(isHit) rowHits++;
-                    if(!isHit && missingNumber === null) missingNumber = n; // Lấy số đầu tiên bị thiếu
+                    if(!isHit && missingNumber === null) missingNumber = n;
                     const numStr = n < 10 ? '0' + n : '' + n;
                     rowHTML += `<div class="t-cell ${isHit?'hit':''}">${numStr}</div>`;
                 });
@@ -1043,7 +1019,6 @@
 
                 cellsHTML += rowHTML;
                 
-                // Hiển thị trạng thái chờ nếu hàng trúng 2/3
                 if (rowHits === NUMBERS_PER_ROW - 1 && config.state !== 'ended' && !statusFooterHTML) { 
                     statusFooterHTML = `
                         <div class="status-footer pulse-wait" style="margin-top: 5px;">
@@ -1061,7 +1036,7 @@
             if (statusFooterHTML && config.state !== 'ended') {
                 card.classList.add('waiting-pulse');
             }
-            if(u === myUser) card.style.borderTopColor = 'var(--gold)'; // Dùng gold để nổi bật vé của mình
+            if(u === myUser) card.style.borderTopColor = 'var(--gold)';
 
             card.innerHTML = `
                 <div class="t-header">
@@ -1075,7 +1050,6 @@
         });
     }
 
-    // ==== CÁC HÀM MODAL HỖ TRỢ ====
     function showCustomMessage(title, message) {
         const modalId = 'custom-alert-modal';
         let modal = document.getElementById(modalId);
@@ -1140,20 +1114,12 @@
 
     // ==== KHỞI TẠO ỨNG DỤNG ====
     document.addEventListener('DOMContentLoaded', function() {
-        // Khởi tạo Firebase
         initializeFirebase();
         
-        // Kiểm tra nếu đã đăng nhập trước đó và điền vào ô user
         const savedUser = localStorage.getItem('loto_last_user');
         if (savedUser) {
             document.getElementById('u-name').value = savedUser;
         }
-        
-        // Bind event cho nút Đăng nhập để lưu user
-        const originalHandleLogin = handleLogin;
-        handleLogin = async function() {
-            await originalHandleLogin();
-        };
     });
 </script>
 </body>
