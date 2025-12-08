@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Final</title>
+    <title>Lô Tô - Đệ Nhất Bang - Hardcore Mode</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -19,8 +19,6 @@
             --bg: #E0F2F1; 
             --text-light: #B2DFDB; 
             --active-color: #00E676; 
-            --offline-color: #78909C;
-            --ready-color: #2196F3;
             --history-ball-color: #FFC107;
         }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -39,7 +37,6 @@
 
         .app-layout { display: flex; height: 100%; }
         
-        /* SIDEBAR */
         .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; position: relative; }
         .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); position: relative; }
         
@@ -69,7 +66,7 @@
         
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .dot-online { background-color: var(--active-color); box-shadow: 0 0 5px var(--active-color); }
-        .dot-offline { background-color: var(--offline-color); }
+        .dot-offline { background-color: #78909C; }
 
         #admin-manage-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; justify-content: center; align-items: center; }
         .manage-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -79,25 +76,25 @@
         
         .main-stage { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; }
         
-        /* === TICKET STYLES & CONTROLS === */
+        /* TICKET STYLES */
         .ticket-card { background: white; width: 170px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid #ccc; height: fit-content; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
         .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
         
-        /* Vé của chính mình */
         .ticket-card.is-me { border: 3px solid #FF9800; box-shadow: 0 0 15px rgba(0,0,0,0.2); transform: translateY(-5px); z-index: 5; }
-        /* Khi đã Ready */
         .ticket-card.is-me.is-ready { border-color: var(--active-color); box-shadow: 0 0 20px rgba(0, 230, 118, 0.4); }
 
         .ticket-controls { margin-top: 10px; display: flex; gap: 5px; }
         .btn-tkt { flex: 1; padding: 8px 0; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; transition: 0.2s; }
-        .btn-shuffle { background: #607D8B; }
+        .btn-shuffle { background: #607D8B; } 
         .btn-shuffle:hover { background: #455A64; }
         .btn-confirm { background: var(--active-color); font-size: 16px; }
         .btn-confirm:hover { background: #00C853; }
-        .btn-unlock { background: #FF9800; color: white; width: 100%; }
-        .btn-unlock:hover { background: #F57C00; }
-        .status-badge-locked { font-size: 11px; color: #E53935; font-weight: bold; text-align: center; margin-top: 10px; border: 1px dashed #E53935; padding: 5px; border-radius: 4px; }
-        .status-badge-ready { font-size: 11px; color: var(--active-color); font-weight: bold; text-align: center; margin-top: 5px; }
+        
+        /* Nút lấy vé lần đầu */
+        .btn-init-ticket { background: var(--primary); width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; color: white; border:none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: pulse 1s infinite; }
+
+        .status-badge-locked { font-size: 12px; color: var(--active-color); font-weight: bold; text-align: center; margin-top: 10px; border: 2px solid var(--active-color); padding: 5px; border-radius: 4px; background: rgba(0, 230, 118, 0.1); }
+        .status-badge-no-ticket { text-align: center; padding: 20px; color: #555; font-style: italic; }
 
         .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
         .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 8px; }
@@ -110,7 +107,6 @@
         
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         #win-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
@@ -168,7 +164,7 @@
     <div id="login-modal">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top:0;">Lô Tô - Đệ Nhất Bang</h2>
-            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Ready Status</div>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Hardcore Mode</div>
             <input type="text" id="u-name" class="inp-std" placeholder="Tên đăng nhập">
             <input type="password" id="u-pass" class="inp-std" placeholder="Mật khẩu">
             <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
@@ -253,6 +249,13 @@
                 <i class="fas fa-user-clock" style="font-size: 60px; color: var(--primary); margin-bottom: 20px;"></i>
                 <h2 style="color: var(--primary);">CHỜ ADMIN DUYỆT</h2>
                 <p>Tài khoản của bạn chưa được kích hoạt.</p>
+            </div>
+            
+            <div id="no-ticket-area" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <h2 style="color: var(--primary);">BẠN CHƯA CÓ VÉ</h2>
+                <button class="btn-init-ticket" onclick="playerRandomTicket()">
+                    <i class="fas fa-ticket-alt"></i> BẤM ĐỂ LẤY VÉ NGAY
+                </button>
             </div>
         </div>
     </div>
@@ -344,12 +347,7 @@
         sessionStorage.setItem('loto_current_session_user', user);
         setOnlineStatus(user, true);
         
-        // Nếu user chưa có vé, tạo tự động
-        if(myRole === 'player' && (!currentUsers[myUser].ticket || currentUsers[myUser].ticket.length === 0)) {
-            const newTicket = generateRandomNums(TICKET_SIZE);
-            usersRef.child(myUser).update({ ticket: newTicket, isReady: false });
-        }
-        
+        // Không tự tạo vé nữa, để người dùng tự bấm lấy vé
         updateUIPermissions();
         renderUI();
     }
@@ -442,7 +440,7 @@
 
     // ==== LOGIC ĐỔI VÉ VÀ XÁC NHẬN ====
     async function playerRandomTicket() {
-        // KIỂM TRA TRẠNG THÁI GAME TRƯỚC KHI ĐỔI
+        // KIỂM TRA TRẠNG THÁI GAME
         if(currentConfig.state !== 'waiting') {
             return alert("Đang quay số, không thể đổi vé!");
         }
@@ -450,16 +448,17 @@
             const newTicket = generateRandomNums(TICKET_SIZE);
             // Cập nhật vé mới và reset isReady về false
             await usersRef.child(myUser).update({ ticket: newTicket, isReady: false });
-            console.log("Đã đổi vé thành công cho:", myUser);
         } catch (e) {
             console.error("Lỗi đổi vé:", e);
-            alert("Lỗi khi kết nối đổi vé, thử lại sau!");
         }
     }
 
-    async function playerConfirmTicket(status) {
+    async function playerConfirmTicket() {
         if(currentConfig.state !== 'waiting') return alert("Trận đấu đã bắt đầu, không thể thao tác!");
-        await usersRef.child(myUser).update({ isReady: status });
+        // Chốt vé (isReady = true)
+        if(confirm("Xác nhận chốt vé? Sau khi chốt bạn sẽ không thể đổi nữa.")) {
+            await usersRef.child(myUser).update({ isReady: true });
+        }
     }
 
     async function adminDraw() {
@@ -484,7 +483,8 @@
         for(let u in currentUsers) {
             if(currentUsers[u].role === 'admin') continue;
             const user = currentUsers[u];
-            if(user.active && user.ticket && user.ticket.length === TICKET_SIZE) {
+            // CHỈ TÍNH THẮNG CHO NGƯỜI ĐÃ SẴN SÀNG (isReady = true) VÀ CÓ VÉ
+            if(user.active && user.ticket && user.ticket.length === TICKET_SIZE && user.isReady) {
                 const history = config.history;
                 let isWinner = false;
                 for (let i = 0; i < NUM_ROWS; i++) {
@@ -503,14 +503,17 @@
     }
 
     async function adminReset() {
-        if(confirm("Xác nhận XÓA BÀN CHƠI?")) {
+        if(confirm("Xác nhận XÓA BÀN CHƠI và BUỘC MỌI NGƯỜI CHỌN LẠI VÉ?")) {
             await currentGameRef.set(getDefaultConfig());
             isWinModalClosed = false; 
             document.getElementById('win-modal').style.display = 'none';
+            
+            // XÓA SẠCH VÉ VÀ RESET TRẠNG THÁI CỦA USER
             const updates = {};
             for(let u in currentUsers) {
                 if(currentUsers[u].role !== 'admin') {
                     updates['users/' + u + '/isReady'] = false;
+                    updates['users/' + u + '/ticket'] = null; // Xóa vé
                 }
             }
             if(Object.keys(updates).length > 0) await window.database.ref().update(updates);
@@ -521,9 +524,8 @@
         if(myRole !== 'admin') return;
         const user = currentUsers[target];
         const newActiveState = !user.active;
-        let newTicket = user.ticket || [];
-        if(newActiveState && (!newTicket || newTicket.length < TICKET_SIZE)) newTicket = generateRandomNums(TICKET_SIZE);
-        await usersRef.child(target).update({ active: newActiveState, ticket: newTicket, isReady: false });
+        // Admin kích hoạt không tự tạo vé nữa, để user tự làm
+        await usersRef.child(target).update({ active: newActiveState });
         renderUserManagementList(); 
     }
     
@@ -639,11 +641,13 @@
             const user = users[u];
             const isOnline = user.isOnline === true;
             const isReady = user.isReady === true;
+            // Chỉ đếm ready nếu user có vé và đang online
+            const hasTicket = user.ticket && user.ticket.length === TICKET_SIZE;
             
             if (isOnline) {
                 online++;
                 totalOnline++;
-                if (isReady) readyCount++;
+                if (isReady && hasTicket) readyCount++;
             }
             
             if(myRole === 'admin') {
@@ -659,8 +663,8 @@
             
             let readyIcon = '';
             if (user.active) {
-                if (isReady) readyIcon = '<i class="fas fa-check-square" style="color:var(--active-color); margin-left:5px;" title="Đã chọn vé"></i>';
-                else readyIcon = '<i class="fas fa-exclamation-circle" style="color:orange; margin-left:5px;" title="Chưa chọn vé"></i>';
+                if (isReady && hasTicket) readyIcon = '<i class="fas fa-check-square" style="color:var(--active-color); margin-left:5px;" title="Đã chọn vé"></i>';
+                else readyIcon = '<i class="fas fa-exclamation-circle" style="color:orange; margin-left:5px;" title="Chưa chốt/Chưa vé"></i>';
             }
 
             div.innerHTML = `
@@ -685,7 +689,26 @@
     function renderUI() {
         updateUI(currentConfig);
         const stage = document.getElementById('stage');
-        Array.from(stage.children).forEach(c => { if(c.id !== 'waiting-approval') stage.removeChild(c); });
+        
+        // GIỮ LẠI CÁC ELEMENT CỐ ĐỊNH, CHỈ XÓA VÉ
+        Array.from(stage.children).forEach(c => { 
+            if(c.id !== 'waiting-approval' && c.id !== 'no-ticket-area') stage.removeChild(c); 
+        });
+
+        // XỬ LÝ HIỂN THỊ CHO NGƯỜI CHƠI CHƯA CÓ VÉ
+        const me = currentUsers[myUser];
+        const noTicketArea = document.getElementById('no-ticket-area');
+        
+        if (myRole === 'player' && me && me.active) {
+            // Nếu không có vé hoặc vé rỗng -> Hiện nút lấy vé
+            if (!me.ticket || me.ticket.length === 0) {
+                noTicketArea.classList.remove('hidden');
+            } else {
+                noTicketArea.classList.add('hidden');
+            }
+        } else {
+            noTicketArea.classList.add('hidden');
+        }
 
         const usersToDisplay = Object.keys(currentUsers)
             .filter(u => currentUsers[u].role !== 'admin')
@@ -727,32 +750,21 @@
             if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
 
             let controlsHTML = '';
-            // LOGIC HIỂN THỊ NÚT BẤM
+            
+            // LOGIC NÚT BẤM CỦA NGƯỜI CHƠI
             if (isMe && currentConfig.state !== 'ended') {
-                if(currentConfig.state === 'playing') {
-                    // Đang quay => KHÓA TOÀN BỘ
-                     controlsHTML = `<div class="status-badge-locked"><i class="fas fa-lock"></i> ĐANG QUAY</div>`;
+                if (!isReady) {
+                    // Chưa chốt -> Hiện nút Đổi và Chốt
+                    controlsHTML = `
+                        <div class="ticket-controls">
+                            <button class="btn-tkt btn-shuffle" onclick="playerRandomTicket()"><i class="fas fa-random"></i> Đổi Vé</button>
+                            <button class="btn-tkt btn-confirm" onclick="playerConfirmTicket()"><i class="fas fa-check"></i> OK</button>
+                        </div>
+                    `;
                 } else {
-                    // Đang chờ (waiting)
-                    if (!isReady) {
-                        controlsHTML = `
-                            <div class="ticket-controls">
-                                <button class="btn-tkt btn-shuffle" onclick="playerRandomTicket()"><i class="fas fa-random"></i> Đổi</button>
-                                <button class="btn-tkt btn-confirm" onclick="playerConfirmTicket(true)"><i class="fas fa-check"></i> Chốt</button>
-                            </div>
-                        `;
-                    } else {
-                        // Đã Ready => Cho phép Mở khóa để đổi lại
-                         controlsHTML = `
-                            <div class="ticket-controls">
-                                <button class="btn-tkt btn-unlock" onclick="playerConfirmTicket(false)"><i class="fas fa-lock-open"></i> Mở khóa</button>
-                            </div>
-                            <div class="status-badge-ready">ĐÃ CHỐT VÉ</div>
-                        `;
-                    }
+                    // Đã chốt -> KHÔNG CÓ NÚT GÌ CẢ (CHỈ CHỜ)
+                    controlsHTML = `<div class="status-badge-locked">ĐÃ CHỐT - CHỜ KẾT QUẢ</div>`;
                 }
-            } else if (currentConfig.state === 'ended') {
-                 controlsHTML = `<div class="status-footer" style="color:var(--red); font-weight:bold;">KẾT THÚC</div>`;
             }
 
             card.innerHTML = `
