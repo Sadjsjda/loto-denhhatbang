@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Hardcore Mode</title>
+    <title>Lô Tô - Đệ Nhất Bang - Final V2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -20,6 +20,7 @@
             --text-light: #B2DFDB; 
             --active-color: #00E676; 
             --history-ball-color: #FFC107;
+            --pending-color: #FF9800;
         }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
@@ -37,6 +38,7 @@
 
         .app-layout { display: flex; height: 100%; }
         
+        /* SIDEBAR */
         .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; position: relative; }
         .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); position: relative; }
         
@@ -80,8 +82,11 @@
         .ticket-card { background: white; width: 170px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid #ccc; height: fit-content; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
         .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
         
-        .ticket-card.is-me { border: 3px solid #FF9800; box-shadow: 0 0 15px rgba(0,0,0,0.2); transform: translateY(-5px); z-index: 5; }
-        .ticket-card.is-me.is-ready { border-color: var(--active-color); box-shadow: 0 0 20px rgba(0, 230, 118, 0.4); }
+        /* Trạng thái vé */
+        .ticket-card.is-pending { border-color: var(--pending-color); }
+        .ticket-card.is-ready { border-color: var(--active-color); box-shadow: 0 0 10px rgba(0, 230, 118, 0.3); }
+
+        .ticket-card.is-me { border-width: 3px; transform: translateY(-5px); z-index: 5; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
         .ticket-controls { margin-top: 10px; display: flex; gap: 5px; }
         .btn-tkt { flex: 1; padding: 8px 0; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; transition: 0.2s; }
@@ -90,11 +95,11 @@
         .btn-confirm { background: var(--active-color); font-size: 16px; }
         .btn-confirm:hover { background: #00C853; }
         
-        /* Nút lấy vé lần đầu */
         .btn-init-ticket { background: var(--primary); width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; color: white; border:none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: pulse 1s infinite; }
 
         .status-badge-locked { font-size: 12px; color: var(--active-color); font-weight: bold; text-align: center; margin-top: 10px; border: 2px solid var(--active-color); padding: 5px; border-radius: 4px; background: rgba(0, 230, 118, 0.1); }
-        .status-badge-no-ticket { text-align: center; padding: 20px; color: #555; font-style: italic; }
+        
+        .status-badge-pending { font-size: 11px; color: #E65100; font-weight: bold; text-align: center; margin-top: 5px; border: 1px dashed #FF9800; padding: 3px; border-radius: 4px; background: #FFF3E0; }
 
         .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
         .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 8px; }
@@ -107,6 +112,7 @@
         
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         #win-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
@@ -164,7 +170,7 @@
     <div id="login-modal">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top:0;">Lô Tô - Đệ Nhất Bang</h2>
-            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Hardcore Mode</div>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Strict Mode</div>
             <input type="text" id="u-name" class="inp-std" placeholder="Tên đăng nhập">
             <input type="password" id="u-pass" class="inp-std" placeholder="Mật khẩu">
             <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
@@ -347,7 +353,6 @@
         sessionStorage.setItem('loto_current_session_user', user);
         setOnlineStatus(user, true);
         
-        // Không tự tạo vé nữa, để người dùng tự bấm lấy vé
         updateUIPermissions();
         renderUI();
     }
@@ -440,13 +445,11 @@
 
     // ==== LOGIC ĐỔI VÉ VÀ XÁC NHẬN ====
     async function playerRandomTicket() {
-        // KIỂM TRA TRẠNG THÁI GAME
         if(currentConfig.state !== 'waiting') {
             return alert("Đang quay số, không thể đổi vé!");
         }
         try {
             const newTicket = generateRandomNums(TICKET_SIZE);
-            // Cập nhật vé mới và reset isReady về false
             await usersRef.child(myUser).update({ ticket: newTicket, isReady: false });
         } catch (e) {
             console.error("Lỗi đổi vé:", e);
@@ -455,8 +458,7 @@
 
     async function playerConfirmTicket() {
         if(currentConfig.state !== 'waiting') return alert("Trận đấu đã bắt đầu, không thể thao tác!");
-        // Chốt vé (isReady = true)
-        if(confirm("Xác nhận chốt vé? Sau khi chốt bạn sẽ không thể đổi nữa.")) {
+        if(confirm("Xác nhận chốt vé? Sau khi chốt bạn sẽ KHÔNG thể đổi nữa.")) {
             await usersRef.child(myUser).update({ isReady: true });
         }
     }
@@ -467,6 +469,22 @@
         if (!config.history) config.history = [];
         if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
         if(config.history.length >= 90) return showCustomMessage("Lỗi", "Hết số.");
+
+        // CHECK QUAN TRỌNG: AI CHƯA CHỐT LÀ CHẶN LUÔN
+        const users = currentUsers;
+        const unreadyUsers = [];
+        for(let u in users) {
+            if(users[u].role !== 'admin' && users[u].active && users[u].isOnline) {
+                // Nếu User đang Online + Active mà chưa Ready => Chặn
+                if(!users[u].isReady) {
+                    unreadyUsers.push(u);
+                }
+            }
+        }
+        
+        if(unreadyUsers.length > 0) {
+            return showCustomMessage("KHÔNG THỂ QUAY", `Các người chơi sau chưa chốt vé: ${unreadyUsers.join(', ')}`);
+        }
 
         isDrawing = true;
         const btn = document.getElementById('draw-btn');
@@ -480,10 +498,9 @@
         config.history.push(n);
 
         let winners = [];
-        for(let u in currentUsers) {
-            if(currentUsers[u].role === 'admin') continue;
-            const user = currentUsers[u];
-            // CHỈ TÍNH THẮNG CHO NGƯỜI ĐÃ SẴN SÀNG (isReady = true) VÀ CÓ VÉ
+        for(let u in users) {
+            if(users[u].role === 'admin') continue;
+            const user = users[u];
             if(user.active && user.ticket && user.ticket.length === TICKET_SIZE && user.isReady) {
                 const history = config.history;
                 let isWinner = false;
@@ -508,7 +525,6 @@
             isWinModalClosed = false; 
             document.getElementById('win-modal').style.display = 'none';
             
-            // XÓA SẠCH VÉ VÀ RESET TRẠNG THÁI CỦA USER
             const updates = {};
             for(let u in currentUsers) {
                 if(currentUsers[u].role !== 'admin') {
@@ -524,7 +540,6 @@
         if(myRole !== 'admin') return;
         const user = currentUsers[target];
         const newActiveState = !user.active;
-        // Admin kích hoạt không tự tạo vé nữa, để user tự làm
         await usersRef.child(target).update({ active: newActiveState });
         renderUserManagementList(); 
     }
@@ -641,7 +656,6 @@
             const user = users[u];
             const isOnline = user.isOnline === true;
             const isReady = user.isReady === true;
-            // Chỉ đếm ready nếu user có vé và đang online
             const hasTicket = user.ticket && user.ticket.length === TICKET_SIZE;
             
             if (isOnline) {
@@ -690,7 +704,6 @@
         updateUI(currentConfig);
         const stage = document.getElementById('stage');
         
-        // GIỮ LẠI CÁC ELEMENT CỐ ĐỊNH, CHỈ XÓA VÉ
         Array.from(stage.children).forEach(c => { 
             if(c.id !== 'waiting-approval' && c.id !== 'no-ticket-area') stage.removeChild(c); 
         });
@@ -700,7 +713,6 @@
         const noTicketArea = document.getElementById('no-ticket-area');
         
         if (myRole === 'player' && me && me.active) {
-            // Nếu không có vé hoặc vé rỗng -> Hiện nút lấy vé
             if (!me.ticket || me.ticket.length === 0) {
                 noTicketArea.classList.remove('hidden');
             } else {
@@ -710,10 +722,12 @@
             noTicketArea.classList.add('hidden');
         }
 
+        // CHỈNH SỬA: HIỆN TOÀN BỘ USER ONLINE, KHÔNG QUAN TRỌNG ĐÃ CHỐT HAY CHƯA
         const usersToDisplay = Object.keys(currentUsers)
             .filter(u => currentUsers[u].role !== 'admin')
             .filter(u => currentUsers[u].active && currentUsers[u].ticket && currentUsers[u].ticket.length === TICKET_SIZE)
-            .filter(u => u === myUser || (currentUsers[u].isOnline === true && currentUsers[u].isReady === true))
+            // LỌC MỚI: Chỉ cần Online là thấy (Kể cả chưa chốt)
+            .filter(u => currentUsers[u].isOnline === true)
             .sort((a, b) => {
                 if (a === myUser) return -1;
                 if (b === myUser) return 1;
@@ -746,7 +760,8 @@
             const isReady = user.isReady === true;
 
             const card = document.createElement('div');
-            card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''} ${isReady ? 'is-ready' : ''}`;
+            // CLASS STYLE MỚI: is-pending (Chưa chốt) vs is-ready (Đã chốt)
+            card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''} ${isReady ? 'is-ready' : 'is-pending'}`;
             if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
 
             let controlsHTML = '';
@@ -754,7 +769,6 @@
             // LOGIC NÚT BẤM CỦA NGƯỜI CHƠI
             if (isMe && currentConfig.state !== 'ended') {
                 if (!isReady) {
-                    // Chưa chốt -> Hiện nút Đổi và Chốt
                     controlsHTML = `
                         <div class="ticket-controls">
                             <button class="btn-tkt btn-shuffle" onclick="playerRandomTicket()"><i class="fas fa-random"></i> Đổi Vé</button>
@@ -762,9 +776,13 @@
                         </div>
                     `;
                 } else {
-                    // Đã chốt -> KHÔNG CÓ NÚT GÌ CẢ (CHỈ CHỜ)
                     controlsHTML = `<div class="status-badge-locked">ĐÃ CHỐT - CHỜ KẾT QUẢ</div>`;
                 }
+            } else if (!isMe && !isReady) {
+                 // Với người khác, nếu chưa chốt thì hiện thông báo nhỏ
+                 controlsHTML = `<div class="status-badge-pending">ĐANG CHỌN...</div>`;
+            } else if (!isMe && isReady) {
+                 controlsHTML = `<div class="status-badge-locked" style="border:none; background:none;">ĐÃ CHỐT</div>`;
             }
 
             card.innerHTML = `
