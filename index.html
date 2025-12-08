@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Multi Session</title>
+    <title>Lô Tô - Đệ Nhất Bang - Ready Status</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -20,6 +20,7 @@
             --text-light: #B2DFDB; 
             --active-color: #00E676; 
             --offline-color: #78909C;
+            --ready-color: #2196F3;
             --history-ball-color: #FFC107;
         }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -38,37 +39,15 @@
 
         .app-layout { display: flex; height: 100%; }
         
-        /* SIDEBAR STYLE */
+        /* SIDEBAR */
         .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; position: relative; }
         .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); position: relative; }
         
-        /* LOGOUT BUTTON - GÓC PHẢI */
-        .logout-absolute {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10;
-        }
-        .btn-logout-icon {
-            background: rgba(255,255,255,0.1);
-            color: #ddd;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
+        .logout-absolute { position: absolute; top: 10px; right: 10px; z-index: 10; }
+        .btn-logout-icon { background: rgba(255,255,255,0.1); color: #ddd; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-logout-icon:hover { background: var(--red); color: white; border-color: var(--red); transform: scale(1.1); }
 
-        #bang-title {
-            font-size: 36px; font-weight: 800; color: var(--red); 
-            padding: 15px 0 10px 0; /* Tăng padding top để tránh đè nút logout */
-            text-shadow: 0 0 5px rgba(229, 57, 53, 0.8); line-height: 1.0; 
-        }
+        #bang-title { font-size: 36px; font-weight: 800; color: var(--red); padding: 15px 0 10px 0; text-shadow: 0 0 5px rgba(229, 57, 53, 0.8); line-height: 1.0; }
         .loto-ball-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; gap: 8px; }
         .current-ball { width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 50px; font-weight: bold; color: var(--red); border: 5px solid var(--gold); box-shadow: 0 0 15px var(--gold); flex-shrink: 0; }
         .side-text { display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: var(--text-light); opacity: 0.9; text-align: center; flex-grow: 1; line-height: 1.2; text-transform: uppercase; }
@@ -87,9 +66,12 @@
         .u-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .u-content { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; }
         .u-name { font-weight: bold; color: white; }
+        
         .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .dot-online { background-color: var(--active-color); box-shadow: 0 0 5px var(--active-color); }
         .dot-offline { background-color: var(--offline-color); }
+        
+        .ready-badge { font-size: 14px; margin-left: 5px; }
 
         #admin-manage-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; justify-content: center; align-items: center; }
         .manage-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -99,24 +81,47 @@
         
         .main-stage { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; }
         
-        /* STYLE VÉ SỐ */
-        .ticket-card { background: white; width: 160px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid #ccc; height: fit-content; transition: 0.3s; position: relative; }
+        /* === TICKET STYLES & CONTROLS === */
+        .ticket-card { background: white; width: 170px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid #ccc; height: fit-content; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
         .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
         
-        /* STYLE ĐẶC BIỆT CHO VÉ CỦA MÌNH (USER HIỆN TẠI) */
+        /* Vé của chính mình */
         .ticket-card.is-me {
-            border: 3px solid var(--gold); /* Viền vàng đậm */
-            box-shadow: 0 0 20px rgba(255, 213, 79, 0.4); /* Phát sáng nhẹ */
+            border: 3px solid #FF9800; /* Màu cam mặc định khi chưa ready */
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
             transform: translateY(-5px);
             z-index: 5;
         }
-        .ticket-card.is-me .t-header {
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--gold);
-            padding-bottom: 3px;
+        /* Khi đã Ready */
+        .ticket-card.is-me.is-ready {
+            border-color: var(--active-color); /* Xanh lá khi đã chốt */
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
         }
+
+        .ticket-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        .btn-tkt {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            transition: 0.2s;
+        }
+        .btn-shuffle { background: #607D8B; }
+        .btn-shuffle:hover { background: #455A64; }
+        
+        .btn-confirm { background: var(--active-color); font-size: 16px; }
+        .btn-confirm:hover { background: #00C853; }
+
+        .btn-unlock { background: #FF9800; color: white; width: 100%; }
+        .btn-unlock:hover { background: #F57C00; }
 
         .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
         .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 8px; }
@@ -145,10 +150,7 @@
 
         .control-title { font-size: 12px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
         .btn-small { padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; font-size: 13px; }
-        .btn-random { background: #607D8B; color: white; width: 100%; }
-        #ticket-editor { border-top: 1px solid #333; padding-top: 10px; margin-bottom: 10px; }
-        .locked-msg { color: #aaa; font-size: 12px; padding: 10px 0; border: 1px dashed #555; border-radius: 4px; }
-
+        
         .admin-tools { padding: 10px; }
         .search-row { display: flex; gap: 5px; margin-bottom: 10px; }
         .inp-search { flex: 1; padding: 8px; border: 1px solid #555; background: #333; color: white; border-radius: 4px; }
@@ -184,15 +186,13 @@
             } catch (e) {
                 console.error("Lỗi khi khởi tạo Firebase:", e);
             }
-        } else {
-            console.error("Firebase SDK chưa được tải.");
         }
     </script>
 
     <div id="login-modal">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top:0;">Lô Tô - Đệ Nhất Bang</h2>
-            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Multi Session (Tab riêng biệt)</div>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Ready Status</div>
             <input type="text" id="u-name" class="inp-std" placeholder="Tên đăng nhập">
             <input type="password" id="u-pass" class="inp-std" placeholder="Mật khẩu">
             <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
@@ -233,20 +233,15 @@
                 
                 <div id="admin-controls" class="hidden">
                     <div style="display:flex; gap:5px;">
-                        <button id="draw-btn" class="btn-full" style="background: var(--gold); color: black; margin-top:5px; flex:1" onclick="adminDraw()">🎲 QUAY</button>
+                        <button id="draw-btn" class="btn-full" style="background: var(--gold); color: black; margin-top:5px; flex:1" onclick="adminDraw()">🎲 QUAY (1s)</button>
                         <button class="btn-full" style="background: #37474F; color: white; margin-top:5px; flex:1" onclick="adminReset()">♻ VÁN MỚI</button>
                     </div>
                     <button class="btn-full" style="background: #1976D2; color: white; margin-top:5px;" onclick="openAdminManageModal()">🧑‍💻 QUẢN LÝ USER</button>
                 </div>
 
                 <div id="player-controls" class="hidden">
-                    <div id="ticket-editor">
-                        <div class="control-title">🎫 VÉ SỐ CỦA BẠN</div>
-                        <div style="font-size:10px; color:var(--text-light); margin-bottom:5px;">Nhấn nút bên dưới để đổi vé mới</div>
-                        <button class="btn-small btn-random" onclick="playerRandomTicket()">🔄 ĐỔI NGẪU NHIÊN 18 SỐ</button>
-                    </div>
                     <div id="ticket-locked" class="hidden">
-                        <div class="locked-msg"><i class="fas fa-lock"></i> Đang quay số<br>Khóa đổi vé</div>
+                        <div class="locked-msg"><i class="fas fa-lock"></i> Đang quay số</div>
                     </div>
                 </div>
             </div>
@@ -264,8 +259,8 @@
 
             <div class="user-list-header">
                 <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                    <span>DANH SÁCH (<span id="count-display">0</span>)</span>
-                    <span id="role-badge" style="color:white; font-weight:normal"></span>
+                    <span style="color:white; font-size:12px;">SẴN SÀNG: <span id="ready-count" style="color:var(--active-color); font-weight:bold; font-size:14px;">0</span> / <span id="total-online-count">0</span></span>
+                    <span id="role-badge" style="color:var(--gold); font-weight:normal; font-size:10px;"></span>
                 </div>
                 <span class="user-count-row">
                     <span class="online-count"><i class="fas fa-circle" style="font-size:8px;"></i> Online: <b id="online-count">0</b></span>
@@ -363,9 +358,7 @@
         });
     }
 
-    // ==== QUAN TRỌNG: DÙNG SESSION STORAGE ====
     function checkAutoLogin(users) {
-        // Sửa: Đổi localStorage thành sessionStorage
         const savedUser = sessionStorage.getItem('loto_current_session_user');
         if (savedUser && users[savedUser]) {
             setupSession(savedUser, users[savedUser].role);
@@ -378,20 +371,22 @@
         myUser = user;
         myRole = role;
         document.getElementById('login-modal').classList.add('hidden');
-        // Sửa: Đổi localStorage thành sessionStorage
         sessionStorage.setItem('loto_current_session_user', user);
-        
         setOnlineStatus(user, true);
+        
+        // Nếu user chưa có vé, tạo tự động
+        if(myRole === 'player' && (!currentUsers[myUser].ticket || currentUsers[myUser].ticket.length === 0)) {
+            const newTicket = generateRandomNums(TICKET_SIZE);
+            usersRef.child(myUser).update({ ticket: newTicket, isReady: false });
+        }
+        
         updateUIPermissions();
         renderUI();
     }
 
     function handleLogout() {
         if(myUser) setOnlineStatus(myUser, false);
-        
-        // Sửa: Xóa session storage
         sessionStorage.removeItem('loto_current_session_user');
-        
         myUser = null;
         myRole = '';
         
@@ -468,16 +463,26 @@
         if(!u || !p) return showCustomMessage("Lỗi", "Thiếu thông tin!");
         if(u === ADMIN_USER || currentUsers[u]) return showCustomMessage("Lỗi", "Tên không hợp lệ hoặc đã tồn tại!");
         
-        const newUser = { pass: p, role: 'player', active: false, ticket: [], isOnline: false, createdAt: new Date().toISOString() };
+        const newUser = { 
+            pass: p, role: 'player', active: false, ticket: [], 
+            isOnline: false, isReady: false, 
+            createdAt: new Date().toISOString() 
+        };
         await usersRef.child(u).set(newUser);
         showCustomMessage("Thành công", "Đăng ký thành công! Chờ Admin duyệt.");
     }
 
+    // ==== LOGIC ĐỔI VÉ VÀ XÁC NHẬN ====
     async function playerRandomTicket() {
         if(currentConfig.state !== 'waiting') return showCustomMessage("Lỗi", "Đang quay số, không thể đổi vé!");
         const newTicket = generateRandomNums(TICKET_SIZE);
-        await usersRef.child(myUser).child('ticket').set(newTicket);
-        showCustomMessage("Thành công", "Đổi vé ngẫu nhiên thành công!");
+        // Khi đổi vé, set isReady = false (User cần xác nhận lại)
+        await usersRef.child(myUser).update({ ticket: newTicket, isReady: false });
+    }
+
+    async function playerConfirmTicket(status) {
+        if(currentConfig.state !== 'waiting') return showCustomMessage("Lỗi", "Trận đấu đã bắt đầu!");
+        await usersRef.child(myUser).update({ isReady: status });
     }
 
     async function adminDraw() {
@@ -516,14 +521,26 @@
         if(winners.length>0) { config.state = 'ended'; config.winner = winners.join(', '); }
         
         await currentGameRef.set(config);
-        setTimeout(() => { isDrawing = false; btn.disabled = false; btn.innerText = '🎲 QUAY'; btn.style.backgroundColor = 'var(--gold)'; }, 1500);
+        
+        // DELAY GIẢM XUỐNG 1S
+        setTimeout(() => { isDrawing = false; btn.disabled = false; btn.innerText = '🎲 QUAY (1s)'; btn.style.backgroundColor = 'var(--gold)'; }, 1000);
     }
 
     async function adminReset() {
         if(confirm("Xác nhận XÓA BÀN CHƠI?")) {
+            // Reset game
             await currentGameRef.set(getDefaultConfig());
             isWinModalClosed = false; 
             document.getElementById('win-modal').style.display = 'none';
+            
+            // Reset trạng thái isReady của tất cả user về false
+            const updates = {};
+            for(let u in currentUsers) {
+                if(currentUsers[u].role !== 'admin') {
+                    updates['users/' + u + '/isReady'] = false;
+                }
+            }
+            if(Object.keys(updates).length > 0) await window.database.ref().update(updates);
         }
     }
 
@@ -533,7 +550,7 @@
         const newActiveState = !user.active;
         let newTicket = user.ticket || [];
         if(newActiveState && (!newTicket || newTicket.length < TICKET_SIZE)) newTicket = generateRandomNums(TICKET_SIZE);
-        await usersRef.child(target).update({ active: newActiveState, ticket: newTicket });
+        await usersRef.child(target).update({ active: newActiveState, ticket: newTicket, isReady: false });
         renderUserManagementList(); 
     }
     
@@ -630,9 +647,8 @@
         if(myRole === 'player' && myUser) {
             const userIsActive = currentUsers[myUser] && currentUsers[myUser].active;
             document.getElementById('waiting-approval').classList.toggle('hidden', userIsActive);
-            document.getElementById('player-controls').classList.toggle('hidden', !userIsActive);
+            // document.getElementById('player-controls').classList.toggle('hidden', !userIsActive); // ĐÃ BỎ SIDEBAR CONTROL
             if(userIsActive) {
-                document.getElementById('ticket-editor').classList.toggle('hidden', config.state !== 'waiting');
                 document.getElementById('ticket-locked').classList.toggle('hidden', config.state === 'waiting');
             }
         }
@@ -647,13 +663,19 @@
             filterVal = document.getElementById('filter-select').value;
         }
 
-        let total=0, online=0, display=0;
+        let total=0, online=0, display=0, readyCount=0, totalOnline=0;
         for(let u in users) {
             if(users[u].role === 'admin') continue; 
             total++;
             const user = users[u];
             const isOnline = user.isOnline === true;
-            if (isOnline) online++;
+            const isReady = user.isReady === true;
+            
+            if (isOnline) {
+                online++;
+                totalOnline++;
+                if (isReady) readyCount++;
+            }
             
             if(myRole === 'admin') {
                 if(searchText && !u.includes(searchText)) continue;
@@ -665,10 +687,18 @@
             const div = document.createElement('div');
             div.className = `user-item ${user.active ? 'active' : 'inactive'}`;
             if(u === myUser) div.style.borderLeft = '3px solid var(--gold)';
+            
+            // Icon trạng thái sẵn sàng
+            let readyIcon = '';
+            if (user.active) {
+                if (isReady) readyIcon = '<i class="fas fa-check-square" style="color:var(--active-color); margin-left:5px;" title="Đã chọn vé"></i>';
+                else readyIcon = '<i class="fas fa-exclamation-circle" style="color:orange; margin-left:5px;" title="Chưa chọn vé"></i>';
+            }
+
             div.innerHTML = `
                 <img src="${generateAvatarUrl(u)}" class="u-avatar">
                 <div class="u-content">
-                    <div class="u-info"><span class="u-name">${u}</span>
+                    <div class="u-info"><span class="u-name">${u} ${readyIcon}</span>
                         <div style="font-size:10px; color:${isOnline?'var(--active-color)':'#999'}">
                             <span class="status-dot ${isOnline?'dot-online':'dot-offline'}"></span> ${isOnline?'Online':'Offline'}
                         </div>
@@ -680,6 +710,8 @@
         document.getElementById('count-display').innerText = myRole==='admin' ? `${display}/${total}` : total;
         document.getElementById('online-count').innerText = online;
         document.getElementById('total-users').innerText = total;
+        document.getElementById('ready-count').innerText = readyCount;
+        document.getElementById('total-online-count').innerText = totalOnline;
     }
 
     function renderUI() {
@@ -690,9 +722,10 @@
         const usersToDisplay = Object.keys(currentUsers)
             .filter(u => currentUsers[u].role !== 'admin')
             .filter(u => currentUsers[u].active && currentUsers[u].ticket && currentUsers[u].ticket.length === TICKET_SIZE)
-            // LỌC: CHỈ HIỆN USER ONLINE
-            .filter(u => currentUsers[u].isOnline === true)
-            // SẮP XẾP: VÉ CỦA MÌNH (MYUSER) LÊN ĐẦU
+            // LỌC: CHỈ HIỆN USER ONLINE NHƯ BẢN CŨ
+            // .filter(u => currentUsers[u].isOnline === true || u === myUser) 
+            // CẬP NHẬT MỚI: MÌNH LUÔN THẤY MÌNH, NGƯỜI KHÁC PHẢI READY VÀ ONLINE MỚI THẤY
+            .filter(u => u === myUser || (currentUsers[u].isOnline === true && currentUsers[u].isReady === true))
             .sort((a, b) => {
                 if (a === myUser) return -1;
                 if (b === myUser) return 1;
@@ -722,16 +755,45 @@
 
             const isWinner = (completedRows > 0); 
             const isMe = (u === myUser);
+            const isReady = user.isReady === true;
 
             const card = document.createElement('div');
-            // THÊM CLASS 'is-me' NẾU LÀ VÉ CỦA MÌNH
-            card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''}`;
+            // CLASS is-me ĐỂ LÀM NỔI BẬT VÉ CỦA MÌNH
+            card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''} ${isReady ? 'is-ready' : ''}`;
             if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
 
+            let controlsHTML = '';
+            // NẾU LÀ MÌNH VÀ GAME CHƯA KẾT THÚC THÌ HIỆN NÚT
+            if (isMe && currentConfig.state !== 'ended') {
+                if (!isReady) {
+                    controlsHTML = `
+                        <div class="ticket-controls">
+                            <button class="btn-tkt btn-shuffle" onclick="playerRandomTicket()"><i class="fas fa-random"></i> Đổi</button>
+                            <button class="btn-tkt btn-confirm" onclick="playerConfirmTicket(true)"><i class="fas fa-check"></i> Chốt</button>
+                        </div>
+                    `;
+                } else {
+                    // Đã Ready thì hiện nút Unlock (nếu game đang waiting)
+                    if (currentConfig.state === 'waiting') {
+                         controlsHTML = `
+                            <div class="ticket-controls">
+                                <button class="btn-tkt btn-unlock" onclick="playerConfirmTicket(false)"><i class="fas fa-lock-open"></i> Đổi lại</button>
+                            </div>
+                        `;
+                    } else {
+                        controlsHTML = `<div class="status-footer" style="color:var(--active-color); font-weight:bold;">ĐÃ CHỐT VÉ</div>`;
+                    }
+                }
+            }
+
             card.innerHTML = `
-                <div class="t-header"><span>${u} ${isMe ? '(Tôi)' : ''}</span><span>${isWinner ? 'KINH!' : ''}</span></div>
+                <div class="t-header">
+                    <span>${u} ${isMe ? '(Tôi)' : ''}</span>
+                    <span>${isWinner ? 'KINH!' : ''}</span>
+                </div>
                 <div class="t-grid">${cellsHTML}</div>
-                ${statusFooterHTML}`;
+                ${statusFooterHTML}
+                ${controlsHTML}`;
             stage.appendChild(card);
         });
     }
