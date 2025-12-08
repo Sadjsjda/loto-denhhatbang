@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Final V2</title>
+    <title>Lô Tô - Đệ Nhất Bang - Final V3</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -95,7 +95,44 @@
         .btn-confirm { background: var(--active-color); font-size: 16px; }
         .btn-confirm:hover { background: #00C853; }
         
-        .btn-init-ticket { background: var(--primary); width: 100%; padding: 15px; font-size: 16px; margin-top: 20px; color: white; border:none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: pulse 1s infinite; }
+        /* UPDATED: Nút lấy vé mới - Gọn gàng & Mượt mà */
+        .btn-init-ticket { 
+            background: var(--primary); 
+            width: 100%; 
+            padding: 12px; 
+            font-size: 15px; 
+            margin-top: 20px; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; /* Bo tròn */
+            cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+        }
+
+        /* Hiệu ứng Glow nhẹ (thay vì Pulse to đùng) */
+        .active-glow {
+            animation: softGlow 2s infinite;
+        }
+
+        @keyframes softGlow {
+            0% { box-shadow: 0 0 0 0 rgba(0, 105, 92, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 105, 92, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 105, 92, 0); }
+        }
+
+        /* Trạng thái Disabled */
+        .btn-init-ticket:disabled {
+            background-color: #90A4AE;
+            color: #eceff1;
+            cursor: not-allowed;
+            animation: none;
+            box-shadow: none;
+            transform: none !important;
+        }
 
         .status-badge-locked { font-size: 12px; color: var(--active-color); font-weight: bold; text-align: center; margin-top: 10px; border: 2px solid var(--active-color); padding: 5px; border-radius: 4px; background: rgba(0, 230, 118, 0.1); }
         
@@ -259,7 +296,7 @@
             
             <div id="no-ticket-area" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                 <h2 style="color: var(--primary);">BẠN CHƯA CÓ VÉ</h2>
-                <button class="btn-init-ticket" onclick="playerRandomTicket()">
+                <button id="btn-init-ticket-action" class="btn-init-ticket active-glow" onclick="playerRandomTicket()">
                     <i class="fas fa-ticket-alt"></i> BẤM ĐỂ LẤY VÉ NGAY
                 </button>
             </div>
@@ -445,8 +482,12 @@
 
     // ==== LOGIC ĐỔI VÉ VÀ XÁC NHẬN ====
     async function playerRandomTicket() {
+        // CẬP NHẬT: Kiểm tra chặt chẽ, nếu đang chơi thì chặn
+        if(currentConfig.state === 'playing') {
+            return alert("Ván đang chạy, không thể lấy vé lúc này!");
+        }
         if(currentConfig.state !== 'waiting') {
-            return alert("Đang quay số, không thể đổi vé!");
+            return alert("Không thể đổi vé lúc này!");
         }
         try {
             const newTicket = generateRandomNums(TICKET_SIZE);
@@ -715,6 +756,23 @@
         if (myRole === 'player' && me && me.active) {
             if (!me.ticket || me.ticket.length === 0) {
                 noTicketArea.classList.remove('hidden');
+
+                // === CẬP NHẬT LOGIC REALTIME CHO NÚT LẤY VÉ ===
+                const btnInit = document.getElementById('btn-init-ticket-action');
+                if(btnInit) {
+                    if (currentConfig.state === 'playing') {
+                        // Nếu đang chơi: Khóa nút, xám màu, tắt hiệu ứng
+                        btnInit.disabled = true;
+                        btnInit.innerHTML = '<i class="fas fa-ban"></i> ĐANG QUAY - KHÓA VÉ';
+                        btnInit.classList.remove('active-glow');
+                    } else {
+                        // Nếu đang chờ: Mở nút, bật hiệu ứng
+                        btnInit.disabled = false;
+                        btnInit.innerHTML = '<i class="fas fa-ticket-alt"></i> BẤM ĐỂ LẤY VÉ NGAY';
+                        btnInit.classList.add('active-glow');
+                    }
+                }
+
             } else {
                 noTicketArea.classList.add('hidden');
             }
