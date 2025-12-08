@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Final V3</title>
+    <title>Lô Tô - Đệ Nhất Bang - Final V4</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -95,7 +95,7 @@
         .btn-confirm { background: var(--active-color); font-size: 16px; }
         .btn-confirm:hover { background: #00C853; }
         
-        /* UPDATED: Nút lấy vé mới - Gọn gàng & Mượt mà */
+        /* Nút lấy vé */
         .btn-init-ticket { 
             background: var(--primary); 
             width: 100%; 
@@ -113,10 +113,8 @@
             font-weight: bold;
         }
 
-        /* Hiệu ứng Glow nhẹ (thay vì Pulse to đùng) */
-        .active-glow {
-            animation: softGlow 2s infinite;
-        }
+        /* Hiệu ứng Glow nhẹ */
+        .active-glow { animation: softGlow 2s infinite; }
 
         @keyframes softGlow {
             0% { box-shadow: 0 0 0 0 rgba(0, 105, 92, 0.7); }
@@ -124,14 +122,12 @@
             100% { box-shadow: 0 0 0 0 rgba(0, 105, 92, 0); }
         }
 
-        /* Trạng thái Disabled */
         .btn-init-ticket:disabled {
             background-color: #90A4AE;
             color: #eceff1;
             cursor: not-allowed;
             animation: none;
             box-shadow: none;
-            transform: none !important;
         }
 
         .status-badge-locked { font-size: 12px; color: var(--active-color); font-weight: bold; text-align: center; margin-top: 10px; border: 2px solid var(--active-color); padding: 5px; border-radius: 4px; background: rgba(0, 230, 118, 0.1); }
@@ -465,6 +461,7 @@
         }
     }
 
+    // UPDATE: Chắc chắn tạo user mới là trống vé và chưa Ready
     async function handleRegister() {
         const u = document.getElementById('u-name').value.trim().toLowerCase();
         const p = document.getElementById('u-pass').value.trim();
@@ -472,8 +469,11 @@
         if(u === ADMIN_USER || currentUsers[u]) return showCustomMessage("Lỗi", "Tên không hợp lệ hoặc đã tồn tại!");
         
         const newUser = { 
-            pass: p, role: 'player', active: false, ticket: [], 
-            isOnline: false, isReady: false, 
+            pass: p, role: 'player', 
+            active: false,      // Chờ duyệt
+            ticket: [],         // Vé rỗng
+            isOnline: false, 
+            isReady: false,     // Chưa sẵn sàng
             createdAt: new Date().toISOString() 
         };
         await usersRef.child(u).set(newUser);
@@ -482,7 +482,6 @@
 
     // ==== LOGIC ĐỔI VÉ VÀ XÁC NHẬN ====
     async function playerRandomTicket() {
-        // CẬP NHẬT: Kiểm tra chặt chẽ, nếu đang chơi thì chặn
         if(currentConfig.state === 'playing') {
             return alert("Ván đang chạy, không thể lấy vé lúc này!");
         }
@@ -511,12 +510,11 @@
         if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
         if(config.history.length >= 90) return showCustomMessage("Lỗi", "Hết số.");
 
-        // CHECK QUAN TRỌNG: AI CHƯA CHỐT LÀ CHẶN LUÔN
         const users = currentUsers;
         const unreadyUsers = [];
         for(let u in users) {
             if(users[u].role !== 'admin' && users[u].active && users[u].isOnline) {
-                // Nếu User đang Online + Active mà chưa Ready => Chặn
+                // Chỉ chặn những người đã active và online nhưng chưa ready
                 if(!users[u].isReady) {
                     unreadyUsers.push(u);
                 }
@@ -570,7 +568,7 @@
             for(let u in currentUsers) {
                 if(currentUsers[u].role !== 'admin') {
                     updates['users/' + u + '/isReady'] = false;
-                    updates['users/' + u + '/ticket'] = null; // Xóa vé
+                    updates['users/' + u + '/ticket'] = null; 
                 }
             }
             if(Object.keys(updates).length > 0) await window.database.ref().update(updates);
@@ -677,6 +675,7 @@
         
         if(myRole === 'player' && myUser) {
             const userIsActive = currentUsers[myUser] && currentUsers[myUser].active;
+            // Nếu chưa active -> Hiện chờ duyệt
             document.getElementById('waiting-approval').classList.toggle('hidden', userIsActive);
         }
     }
@@ -705,6 +704,7 @@
                 if (isReady && hasTicket) readyCount++;
             }
             
+            // UPDATE: Luôn hiển thị user online để admin thấy, bất kể active hay chưa
             if(myRole === 'admin') {
                 if(searchText && !u.includes(searchText)) continue;
                 if(filterVal === 'online' && !isOnline) continue;
@@ -720,6 +720,8 @@
             if (user.active) {
                 if (isReady && hasTicket) readyIcon = '<i class="fas fa-check-square" style="color:var(--active-color); margin-left:5px;" title="Đã chọn vé"></i>';
                 else readyIcon = '<i class="fas fa-exclamation-circle" style="color:orange; margin-left:5px;" title="Chưa chốt/Chưa vé"></i>';
+            } else {
+                 readyIcon = '<span style="font-size:9px; color:orange">(Chờ duyệt)</span>';
             }
 
             div.innerHTML = `
@@ -754,25 +756,23 @@
         const noTicketArea = document.getElementById('no-ticket-area');
         
         if (myRole === 'player' && me && me.active) {
+            // Chỉ hiển thị nút lấy vé khi vé rỗng
             if (!me.ticket || me.ticket.length === 0) {
                 noTicketArea.classList.remove('hidden');
 
-                // === CẬP NHẬT LOGIC REALTIME CHO NÚT LẤY VÉ ===
+                // Logic Realtime cho nút lấy vé
                 const btnInit = document.getElementById('btn-init-ticket-action');
                 if(btnInit) {
                     if (currentConfig.state === 'playing') {
-                        // Nếu đang chơi: Khóa nút, xám màu, tắt hiệu ứng
                         btnInit.disabled = true;
                         btnInit.innerHTML = '<i class="fas fa-ban"></i> ĐANG QUAY - KHÓA VÉ';
                         btnInit.classList.remove('active-glow');
                     } else {
-                        // Nếu đang chờ: Mở nút, bật hiệu ứng
                         btnInit.disabled = false;
                         btnInit.innerHTML = '<i class="fas fa-ticket-alt"></i> BẤM ĐỂ LẤY VÉ NGAY';
                         btnInit.classList.add('active-glow');
                     }
                 }
-
             } else {
                 noTicketArea.classList.add('hidden');
             }
@@ -780,11 +780,13 @@
             noTicketArea.classList.add('hidden');
         }
 
-        // CHỈNH SỬA: HIỆN TOÀN BỘ USER ONLINE, KHÔNG QUAN TRỌNG ĐÃ CHỐT HAY CHƯA
+        // UPDATE QUAN TRỌNG: Lọc danh sách hiển thị trên Màn Hình Chính (Grid)
+        // Chỉ hiện những người CÓ VÉ đầy đủ. Người mới vào (vé rỗng) sẽ KHÔNG hiện ở đây.
         const usersToDisplay = Object.keys(currentUsers)
             .filter(u => currentUsers[u].role !== 'admin')
+            // Điều kiện Active + Có vé đủ 18 số => Mới vẽ Card
             .filter(u => currentUsers[u].active && currentUsers[u].ticket && currentUsers[u].ticket.length === TICKET_SIZE)
-            // LỌC MỚI: Chỉ cần Online là thấy (Kể cả chưa chốt)
+            // Lọc: Chỉ cần Online là thấy (nếu đã có vé)
             .filter(u => currentUsers[u].isOnline === true)
             .sort((a, b) => {
                 if (a === myUser) return -1;
@@ -818,13 +820,11 @@
             const isReady = user.isReady === true;
 
             const card = document.createElement('div');
-            // CLASS STYLE MỚI: is-pending (Chưa chốt) vs is-ready (Đã chốt)
             card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''} ${isReady ? 'is-ready' : 'is-pending'}`;
             if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
 
             let controlsHTML = '';
             
-            // LOGIC NÚT BẤM CỦA NGƯỜI CHƠI
             if (isMe && currentConfig.state !== 'ended') {
                 if (!isReady) {
                     controlsHTML = `
@@ -837,7 +837,6 @@
                     controlsHTML = `<div class="status-badge-locked">ĐÃ CHỐT - CHỜ KẾT QUẢ</div>`;
                 }
             } else if (!isMe && !isReady) {
-                 // Với người khác, nếu chưa chốt thì hiện thông báo nhỏ
                  controlsHTML = `<div class="status-badge-pending">ĐANG CHỌN...</div>`;
             } else if (!isMe && isReady) {
                  controlsHTML = `<div class="status-badge-locked" style="border:none; background:none;">ĐÃ CHỐT</div>`;
