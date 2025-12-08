@@ -39,8 +39,29 @@
         .app-layout { display: flex; height: 100%; }
         
         .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; }
-        .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); }
+        .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); position: relative; }
         
+        /* Logout Button Style */
+        .logout-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        .btn-logout {
+            background: none;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ddd;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); color: white; border-color: white; }
+
         #bang-title {
             font-size: 36px; 
             font-weight: 800;
@@ -123,124 +144,34 @@
         .u-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 5px rgba(255,255,255,0.5); }
         .u-content { flex-grow: 1; display: flex; justify-content: space-between; align-items: center; }
         .u-name { font-weight: bold; color: white; }
-        .u-status { font-size: 14px; } 
-        .u-info { display: flex; flex-direction: column; }
-        
-        /* Chấm trạng thái online/offline */
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
+        .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .dot-online { background-color: var(--active-color); box-shadow: 0 0 5px var(--active-color); }
         .dot-offline { background-color: var(--offline-color); }
 
         #admin-manage-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 5000; display: none; justify-content: center; align-items: center; }
         .manage-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .manage-list-item { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 10px; margin-bottom: 5px; border-bottom: 1px solid #eee;
-            border-left: 4px solid var(--primary); border-radius: 4px;
-        }
-        .manage-controls { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center;
-        }
-        .btn-reset-pass {
-            background: #FF9800;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            border: none;
-            transition: 0.2s;
-        }
-        .btn-reset-pass:hover { background: #F57C00; }
+        .manage-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; margin-bottom: 5px; border-bottom: 1px solid #eee; border-left: 4px solid var(--primary); border-radius: 4px; }
+        .manage-controls { display: flex; gap: 10px; align-items: center; }
+        .btn-reset-pass { background: #FF9800; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: none; }
         
         .main-stage { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; }
-        .ticket-card { 
-            background: white; 
-            width: 160px; 
-            padding: 10px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            border-top: 5px solid var(--primary); 
-            height: fit-content; 
-            transition: 0.3s; 
-            position: relative;
-        }
+        .ticket-card { background: white; width: 160px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid var(--primary); height: fit-content; transition: 0.3s; position: relative; }
         .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
         .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
-        .t-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px; 
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 8px; 
-        }
-        .t-cell { 
-            height: 35px; 
-            background: #eee; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; 
-            font-size: 16px; 
-            border-radius: 4px; 
-            color: #555; 
-            border: 1px solid #ddd;
-        }
-        .t-cell.hit { 
-            background: var(--red); 
-            color: white; 
-            border-color: var(--red); 
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-        }
+        .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 8px; }
+        .t-cell { height: 35px; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border-radius: 4px; color: #555; border: 1px solid #ddd; }
+        .t-cell.hit { background: var(--red); color: white; border-color: var(--red); box-shadow: inset 0 0 5px rgba(0,0,0,0.3); }
         
-        .status-footer { 
-            text-align: center; 
-            padding-top: 5px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            color: #777;
-        }
-        .pulse-wait {
-            color: var(--gold);
-            animation: pulse 1s infinite;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-        .pulse-wait .ball-icon {
-            width: 8px;
-            height: 8px;
-            background: var(--history-ball-color);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 3px var(--history-ball-color);
-        }
+        .status-footer { text-align: center; padding-top: 5px; font-size: 11px; font-weight: bold; color: #777; }
+        .pulse-wait { color: var(--gold); animation: pulse 1s infinite; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .pulse-wait .ball-icon { width: 8px; height: 8px; background: var(--history-ball-color); border-radius: 50%; display: inline-block; }
         
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
         #win-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
-        .win-title { color: var(--gold); font-size: 60px; margin: 0; text-shadow: 0 0 20px red; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .win-title { color: var(--gold); font-size: 60px; margin: 0; text-shadow: 0 0 20px red; animation: popIn 0.5s; }
         .btn-close-win { margin-top: 30px; padding: 12px 40px; font-size: 18px; background: white; color: var(--red); border: none; border-radius: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 0 15px white; transition: 0.3s; }
-        .btn-close-win:hover { transform: scale(1.1); }
-        .hidden { display: none !important; }
-
-        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
@@ -249,11 +180,8 @@
         input:checked + .slider:before { transform: translateX(20px); }
 
         .control-title { font-size: 12px; color: var(--gold); margin-bottom: 5px; font-weight: bold; }
-        .manual-pick-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 5px; }
-        .mini-inp { width: 100%; padding: 8px; border: 1px solid #555; background: #333; color: white; border-radius: 4px; text-align: center; font-weight: bold; }
         .btn-small { padding: 8px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s; font-size: 13px; }
-        .btn-manual { background: var(--primary); color: white; }
-        .btn-random { background: #607D8B; color: white; }
+        .btn-random { background: #607D8B; color: white; width: 100%; }
         #ticket-editor { border-top: 1px solid #333; padding-top: 10px; margin-bottom: 10px; }
         .locked-msg { color: #aaa; font-size: 12px; padding: 10px 0; border: 1px dashed #555; border-radius: 4px; }
 
@@ -264,17 +192,15 @@
         .btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 5px; }
         .btn-del { color: #E53935; }
         
-        .connection-status {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 1000;
-        }
+        .connection-status { position: fixed; bottom: 10px; right: 10px; padding: 5px 10px; border-radius: 20px; font-size: 12px; z-index: 1000; }
         .connected { background: #4CAF50; color: white; }
         .disconnected { background: #f44336; color: white; }
+        .hidden { display: none !important; }
+
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -329,24 +255,20 @@
     <div class="app-layout">
         <div class="sidebar">
             <div class="sidebar-header">
+                <div id="logout-ui" class="logout-bar hidden">
+                    <button class="btn-logout" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Logoff
+                    </button>
+                </div>
+
                 <div id="bang-title">ĐỆ NHẤT BANG</div>
                 <div class="loto-ball-wrapper">
                     <div class="side-text left-text">
-                        <div>PHONG</div>
-                        <div>ĐỘ</div>
-                        <div>CHỈ</div>
-                        <div>LÀ</div>
-                        <div>NHẤT</div>
-                        <div>THỜI</div>
+                        <div>PHONG</div><div>ĐỘ</div><div>CHỈ</div><div>LÀ</div><div>NHẤT</div><div>THỜI</div>
                     </div>
                     <div class="current-ball" id="ball-display">--</div>
                     <div class="side-text right-text">
-                        <div>ĐẲNG</div>
-                        <div>CẤP</div>
-                        <div>MỚI</div> 
-                        <div>LÀ</div>
-                        <div>MÃI</div>
-                        <div>MÃI</div>
+                        <div>ĐẲNG</div><div>CẤP</div><div>MỚI</div><div>LÀ</div><div>MÃI</div><div>MÃI</div>
                     </div>
                 </div>
                 
@@ -360,14 +282,8 @@
 
                 <div id="player-controls" class="hidden">
                     <div id="ticket-editor">
-                        <div class="control-title">🎫 CHỌN 18 SỐ CỦA BẠN</div>
-                        <div class="manual-pick-row">
-                            <input type="number" id="n1" class="mini-inp" placeholder="01">
-                            <input type="number" id="n2" class="mini-inp" placeholder="02">
-                            <input type="number" id="n3" class="mini-inp" placeholder="03">
-                            <input type="number" id="n4" class="mini-inp" placeholder="04">
-                        </div>
-                        <div style="font-size:10px; color:var(--red); margin-bottom:5px;">*Khuyến nghị dùng Đổi Ngẫu nhiên</div>
+                        <div class="control-title">🎫 VÉ SỐ CỦA BẠN</div>
+                        <div style="font-size:10px; color:var(--text-light); margin-bottom:5px;">Nhấn nút bên dưới để đổi vé mới</div>
                         <button class="btn-small btn-random" onclick="playerRandomTicket()">🔄 ĐỔI NGẪU NHIÊN 18 SỐ</button>
                     </div>
                     <div id="ticket-locked" class="hidden">
@@ -426,7 +342,6 @@
     <div id="connection-status" class="connection-status hidden"></div>
 
 <script>
-    // ==== CẤU HÌNH ỨNG DỤNG ====
     const MAX_USERS = 200; 
     const TICKET_SIZE = 18;
     const NUMBERS_PER_ROW = 3;
@@ -441,16 +356,11 @@
     let isDrawing = false;
     let currentGameRef = null;
     let usersRef = null;
-    
     let currentConfig = getDefaultConfig();
     let currentUsers = {};
 
-    // ==== FIREBASE FUNCTIONS ====
     function initializeFirebase() {
-        if (!window.database) {
-            console.error("Database object not initialized.");
-            return;
-        }
+        if (!window.database) return console.error("Database object not initialized.");
         
         currentGameRef = window.database.ref('currentGame');
         usersRef = window.database.ref('users');
@@ -468,36 +378,23 @@
             const usersData = snapshot.val();
             if (usersData) {
                 currentUsers = usersData;
-                
-                // TỰ ĐỘNG LOGIN NẾU ĐÃ CÓ LỊCH SỬ
-                if (!myUser) {
-                    checkAutoLogin(usersData);
-                } else {
-                    // Update lại role nếu database đổi (ví dụ được kích hoạt)
-                    if (currentUsers[myUser]) {
-                        myRole = currentUsers[myUser].role;
-                        updateUIPermissions();
-                    }
+                if (!myUser) checkAutoLogin(usersData);
+                else if (currentUsers[myUser]) {
+                    myRole = currentUsers[myUser].role;
+                    updateUIPermissions();
                 }
-                
                 updateUsersList(currentUsers);
                 renderUI();
-            } else {
-                ensureAdminExists();
-            }
+            } else ensureAdminExists();
         });
         
-        // Theo dõi trạng thái kết nối
         window.database.ref('.info/connected').on('value', (snapshot) => {
             const statusEl = document.getElementById('connection-status');
             if (snapshot.val() === true) {
                 statusEl.textContent = '🟢 Đã kết nối';
                 statusEl.className = 'connection-status connected';
                 statusEl.classList.remove('hidden');
-                
-                // NẾU ĐANG LOGIN THÌ BÁO ONLINE CHO SERVER
-                if(myUser) setOnlineStatus(myUser);
-
+                if(myUser) setOnlineStatus(myUser, true);
                 setTimeout(() => { statusEl.classList.add('hidden'); }, 3000);
             } else {
                 statusEl.textContent = '🔴 Mất kết nối';
@@ -507,49 +404,66 @@
         });
     }
 
-    // ==== HÀM TỰ ĐỘNG LOGIN ====
     function checkAutoLogin(users) {
         const savedUser = localStorage.getItem('loto_last_user');
         if (savedUser && users[savedUser]) {
-            // Giả lập login thành công
             setupSession(savedUser, users[savedUser].role);
-            console.log("Auto-login success:", savedUser);
         } else {
-            // Không có user lưu, hiện bảng login
             document.getElementById('login-modal').classList.remove('hidden');
         }
     }
 
-    // ==== HÀM THIẾT LẬP PHIÊN LÀM VIỆC ====
     function setupSession(user, role) {
         myUser = user;
         myRole = role;
-        
-        // Ẩn modal login
         document.getElementById('login-modal').classList.add('hidden');
-        
-        // Lưu local storage
         localStorage.setItem('loto_last_user', user);
-        
-        // Set trạng thái Online trên server
-        setOnlineStatus(user);
-        
-        // Cập nhật giao diện
+        setOnlineStatus(user, true);
         updateUIPermissions();
         renderUI();
     }
 
-    function setOnlineStatus(user) {
+    // ==== CHỨC NĂNG LOGOFF MỚI ====
+    function handleLogout() {
+        if(myUser) {
+            setOnlineStatus(myUser, false);
+        }
+        localStorage.removeItem('loto_last_user');
+        myUser = null;
+        myRole = '';
+        
+        // Ẩn các control
+        document.getElementById('admin-controls').classList.add('hidden');
+        document.getElementById('player-controls').classList.add('hidden');
+        document.getElementById('admin-tools-panel').classList.add('hidden');
+        document.getElementById('logout-ui').classList.add('hidden'); // Ẩn nút Logout
+        
+        // Hiện lại bảng login
+        document.getElementById('login-modal').classList.remove('hidden');
+        document.getElementById('u-pass').value = ''; // Xóa pass cũ
+    }
+
+    function setOnlineStatus(user, status) {
         if (!user) return;
-        // Ghi vào database là đang online
         const myStatusRef = window.database.ref('users/' + user + '/isOnline');
-        myStatusRef.set(true);
-        // Khi mất kết nối (tắt tab, rớt mạng), server tự set thành false
-        myStatusRef.onDisconnect().set(false);
+        if(status) {
+            myStatusRef.set(true);
+            myStatusRef.onDisconnect().set(false);
+        } else {
+            myStatusRef.set(false);
+        }
     }
 
     function updateUIPermissions() {
         const roleBadge = document.getElementById('role-badge');
+        
+        // Hiện nút Logout khi đã đăng nhập
+        if(myUser) {
+            document.getElementById('logout-ui').classList.remove('hidden');
+        } else {
+            document.getElementById('logout-ui').classList.add('hidden');
+        }
+
         if(myRole === 'admin') {
             document.getElementById('admin-controls').classList.remove('hidden');
             document.getElementById('admin-tools-panel').classList.remove('hidden'); 
@@ -584,162 +498,101 @@
     async function handleLogin() {
         const u = document.getElementById('u-name').value.trim().toLowerCase();
         const p = document.getElementById('u-pass').value.trim();
-        
-        try {
-            const users = currentUsers;
-            if(users[u] && users[u].pass === p) {
-                setupSession(u, users[u].role);
-            } else { 
-                showCustomMessage("Đăng nhập thất bại", "Sai tên hoặc mật khẩu!"); 
-            }
-        } catch (error) {
-            console.error("Login error:", error);
-            showCustomMessage("Lỗi", "Không thể kết nối đến server!");
+        if(currentUsers[u] && currentUsers[u].pass === p) {
+            setupSession(u, currentUsers[u].role);
+        } else { 
+            showCustomMessage("Lỗi", "Sai tên hoặc mật khẩu!"); 
         }
     }
 
     async function handleRegister() {
         const u = document.getElementById('u-name').value.trim().toLowerCase();
         const p = document.getElementById('u-pass').value.trim();
-        if(!u || !p) return showCustomMessage("Lỗi", "Thiếu thông tin đăng ký!");
-        if(u === ADMIN_USER) return showCustomMessage("Lỗi", "Tên này đã được sử dụng!");
+        if(!u || !p) return showCustomMessage("Lỗi", "Thiếu thông tin!");
+        if(u === ADMIN_USER || currentUsers[u]) return showCustomMessage("Lỗi", "Tên không hợp lệ hoặc đã tồn tại!");
         
-        try {
-            let users = currentUsers;
-            if(Object.keys(users).length >= MAX_USERS) return showCustomMessage("Lỗi", `Hệ thống đã đạt giới hạn ${MAX_USERS} người!`);
-            if(users[u]) return showCustomMessage("Lỗi", "Tên đã tồn tại!");
-            
-            const newUser = { 
-                pass: p, role: 'player', active: false, ticket: [], 
-                isOnline: false, // Default offline
-                createdAt: new Date().toISOString() 
-            };
-            await usersRef.child(u).set(newUser);
-            showCustomMessage("Thành công", "Đăng ký thành công! Hãy chờ Admin kích hoạt.");
-        } catch (error) {
-            console.error("Register error:", error);
-            showCustomMessage("Lỗi", "Không thể đăng ký lúc này!");
-        }
+        const newUser = { pass: p, role: 'player', active: false, ticket: [], isOnline: false, createdAt: new Date().toISOString() };
+        await usersRef.child(u).set(newUser);
+        showCustomMessage("Thành công", "Đăng ký thành công! Chờ Admin duyệt.");
     }
 
     async function playerRandomTicket() {
-        try {
-            const config = currentConfig;
-            if(config.state !== 'waiting') return showCustomMessage("Lỗi", "Chỉ được đổi vé khi chưa quay số!");
-            const newTicket = generateRandomNums(TICKET_SIZE);
-            await usersRef.child(myUser).child('ticket').set(newTicket);
-            showCustomMessage("Thành công", `Đã tạo vé ngẫu nhiên ${TICKET_SIZE} số thành công!`);
-        } catch (error) {
-            console.error("Random ticket error:", error);
-            showCustomMessage("Lỗi", "Không thể tạo vé lúc này!");
-        }
+        if(currentConfig.state !== 'waiting') return showCustomMessage("Lỗi", "Đang quay số, không thể đổi vé!");
+        const newTicket = generateRandomNums(TICKET_SIZE);
+        await usersRef.child(myUser).child('ticket').set(newTicket);
+        showCustomMessage("Thành công", "Đổi vé ngẫu nhiên thành công!");
     }
 
     async function adminDraw() {
-        const drawBtn = document.getElementById('draw-btn');
-        if (isDrawing || drawBtn.disabled) return; 
-        try {
-            let config = { ...currentConfig };
-            // FIX 2: Check null history
-            if (!config.history) config.history = [];
+        if (isDrawing) return;
+        let config = { ...currentConfig };
+        if (!config.history) config.history = [];
+        if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
+        if(config.history.length >= 90) return showCustomMessage("Lỗi", "Hết số.");
 
-            const users = currentUsers;
-            if(config.state === 'ended') return showCustomMessage("Lỗi", "Ván đã kết thúc. Hãy nhấn VÁN MỚI.");
-            if(config.history.length >= 90) return showCustomMessage("Lỗi", "Đã hết số để quay.");
+        isDrawing = true;
+        const btn = document.getElementById('draw-btn');
+        btn.disabled = true; btn.innerText = '⏳...'; btn.style.backgroundColor = '#607D8B';
 
-            isDrawing = true;
-            drawBtn.disabled = true;
-            drawBtn.innerText = '⏳ 1.5s...';
-            drawBtn.style.backgroundColor = '#607D8B';
+        config.state = 'playing';
+        let n;
+        do { n = Math.floor(Math.random()*90)+1; } while(config.history.includes(n));
+        
+        config.currentNum = n;
+        config.history.push(n);
 
-            config.state = 'playing';
-            let n;
-            do { n = Math.floor(Math.random()*90)+1; } while(config.history.includes(n));
-            
-            config.currentNum = n;
-            config.history.push(n);
-            config.lastUpdated = new Date().toISOString();
-
-            // Check Win Logic
-            let winners = [];
-            for(let u in users) {
-                if(users[u].role === 'admin') continue;
-                const user = users[u];
-                
-                if(user.active && user.ticket && user.ticket.length === TICKET_SIZE) {
-                    const history = config.history;
-                    let isWinner = false;
-                    for (let i = 0; i < NUM_ROWS; i++) {
-                        const rowStart = i * NUMBERS_PER_ROW;
-                        const rowEnd = rowStart + NUMBERS_PER_ROW;
-                        const row = user.ticket.slice(rowStart, rowEnd);
-                        if (row.every(num => history.includes(num))) { isWinner = true; break; }
-                    }
-                    if(isWinner) winners.push(u);
+        let winners = [];
+        for(let u in currentUsers) {
+            if(currentUsers[u].role === 'admin') continue;
+            const user = currentUsers[u];
+            if(user.active && user.ticket && user.ticket.length === TICKET_SIZE) {
+                const history = config.history;
+                let isWinner = false;
+                for (let i = 0; i < NUM_ROWS; i++) {
+                    const row = user.ticket.slice(i*3, i*3+3);
+                    if (row.every(num => history.includes(num))) { isWinner = true; break; }
                 }
+                if(isWinner) winners.push(u);
             }
-            
-            if(winners.length>0) {
-                config.state = 'ended';
-                config.winner = winners.join(', ');
-            }
-            
-            await currentGameRef.set(config);
-            setTimeout(() => {
-                isDrawing = false;
-                drawBtn.disabled = false;
-                drawBtn.innerText = '🎲 QUAY';
-                drawBtn.style.backgroundColor = 'var(--gold)';
-            }, 1500);
-        } catch (error) {
-            console.error("Admin draw error:", error);
-            isDrawing = false;
-            drawBtn.disabled = false;
-            drawBtn.innerText = '🎲 QUAY';
         }
+        
+        if(winners.length>0) { config.state = 'ended'; config.winner = winners.join(', '); }
+        
+        await currentGameRef.set(config);
+        setTimeout(() => { isDrawing = false; btn.disabled = false; btn.innerText = '🎲 QUAY'; btn.style.backgroundColor = 'var(--gold)'; }, 1500);
     }
 
     async function adminReset() {
-        showCustomConfirm("Xác nhận", "Bạn có chắc chắn muốn XÓA BÀN CHƠI và bắt đầu ván mới?", async () => {
-            try {
-                const defaultConfig = getDefaultConfig();
-                await currentGameRef.set(defaultConfig);
-                isWinModalClosed = false; 
-                document.getElementById('win-modal').style.display = 'none';
-                showCustomMessage("Thành công", "Đã reset ván chơi thành công!");
-            } catch (error) {
-                console.error("Reset error:", error);
-            }
-        });
+        if(confirm("Xác nhận XÓA BÀN CHƠI?")) {
+            await currentGameRef.set(getDefaultConfig());
+            isWinModalClosed = false; 
+            document.getElementById('win-modal').style.display = 'none';
+        }
     }
 
     async function toggleActive(target) {
         if(myRole !== 'admin') return;
-        try {
-            const user = currentUsers[target];
-            const newActiveState = !user.active;
-            let newTicket = user.ticket || [];
-            if(newActiveState && (!newTicket || newTicket.length < TICKET_SIZE)) newTicket = generateRandomNums(TICKET_SIZE);
-            await usersRef.child(target).update({ active: newActiveState, ticket: newTicket });
-            renderUserManagementList(); 
-        } catch (error) { console.error("Toggle active error:", error); }
+        const user = currentUsers[target];
+        const newActiveState = !user.active;
+        let newTicket = user.ticket || [];
+        if(newActiveState && (!newTicket || newTicket.length < TICKET_SIZE)) newTicket = generateRandomNums(TICKET_SIZE);
+        await usersRef.child(target).update({ active: newActiveState, ticket: newTicket });
+        renderUserManagementList(); 
     }
     
     async function resetUserPassword(target) {
-        if(myRole !== 'admin') return;
-        showCustomConfirm("Xác nhận Reset Mật khẩu", `Đặt lại pass user "${target}" thành "${DEFAULT_PLAYER_PASS}"?`, async () => {
+        if(myRole === 'admin' && confirm(`Reset pass của ${target}?`)) {
             await usersRef.child(target).child('pass').set(DEFAULT_PLAYER_PASS);
-            showCustomMessage("Thành công", "Đã reset mật khẩu.");
+            alert("Đã reset thành công.");
             renderUserManagementList();
-        });
+        }
     }
 
     async function deleteUserWrapper(u) {
-        if(myRole !== 'admin') return;
-        showCustomConfirm("Xác nhận Xóa", `Xóa vĩnh viễn user: ${u}?`, async () => {
+        if(myRole === 'admin' && confirm(`Xóa user ${u}?`)) {
             await usersRef.child(u).remove();
             renderUserManagementList(); 
-        });
+        }
     }
     
     function generateRandomNums(count) {
@@ -752,96 +605,63 @@
     }
     
     function openAdminManageModal() {
-        if(myRole !== 'admin') return;
-        document.getElementById('admin-manage-modal').style.display = 'flex';
-        renderUserManagementList();
+        if(myRole === 'admin') {
+            document.getElementById('admin-manage-modal').style.display = 'flex';
+            renderUserManagementList();
+        }
     }
     
     function renderUserManagementList() {
         if (myRole !== 'admin') return;
-        const users = currentUsers;
         const listDiv = document.getElementById('admin-user-management-list');
         listDiv.innerHTML = '';
         let hasUsers = false;
-
-        for(let u in users) {
-            if(users[u].role === 'admin') continue; 
+        for(let u in currentUsers) {
+            if(currentUsers[u].role === 'admin') continue; 
             hasUsers = true;
-            const user = users[u];
-            const avatarUrl = generateAvatarUrl(u);
+            const user = currentUsers[u];
             const isOnline = user.isOnline === true;
-
             const item = document.createElement('div');
             item.className = 'manage-list-item';
             item.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${avatarUrl}" class="u-avatar">
+                    <img src="${generateAvatarUrl(u)}" class="u-avatar">
                     <div style="font-size:14px; color:#333;">
                         <span style="font-weight:bold;">${u}</span>
-                        ${isOnline ? '<span style="color:green; font-size:10px;">(Online)</span>' : '<span style="color:#aaa; font-size:10px;">(Offline)</span>'}
+                        ${isOnline ? '<span style="color:green; font-size:10px;">(On)</span>' : '<span style="color:#aaa; font-size:10px;">(Off)</span>'}
                     </div>
                 </div>
                 <div class="manage-controls">
-                    <button class="btn-reset-pass" onclick="resetUserPassword('${u}')">RESET PASS</button>
-                    <label class="switch">
-                        <input type="checkbox" ${user.active?'checked':''} onchange="toggleActive('${u}');">
-                        <span class="slider"></span>
-                    </label>
+                    <button class="btn-reset-pass" onclick="resetUserPassword('${u}')">RESET</button>
+                    <label class="switch"><input type="checkbox" ${user.active?'checked':''} onchange="toggleActive('${u}');"><span class="slider"></span></label>
                     <button class="btn-icon btn-del" onclick="deleteUserWrapper('${u}')"><i class="fas fa-trash"></i></button>
-                </div>
-            `;
+                </div>`;
             listDiv.appendChild(item);
         }
         if (!hasUsers) listDiv.innerHTML = '<p style="text-align:center;">Chưa có người dùng.</p>';
     }
 
     function exportUsersToExcel() {
-        if (myRole !== 'admin' || typeof XLSX === 'undefined') return showCustomMessage("Lỗi", "Thư viện chưa sẵn sàng.");
-        const users = currentUsers;
+        if (myRole !== 'admin' || typeof XLSX === 'undefined') return alert("Lỗi thư viện.");
         const usersData = [];
-        for (const u in users) {
-            if (users[u].role === 'admin') continue;
-            usersData.push({ 'User': u, 'Pass': users[u].pass });
+        for (const u in currentUsers) {
+            if (currentUsers[u].role === 'admin') continue;
+            usersData.push({ 'User': u, 'Pass': currentUsers[u].pass });
         }
-        if (usersData.length === 0) return showCustomMessage("Lỗi", "Không có người dùng.");
-        const worksheet = XLSX.utils.json_to_sheet(usersData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "User_Passwords");
-        try { XLSX.writeFile(workbook, "DanhSachUser.xlsx"); } catch (e) { showCustomMessage("Lỗi", "Không thể xuất file."); }
+        if (usersData.length === 0) return alert("Không có data.");
+        const ws = XLSX.utils.json_to_sheet(usersData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Users");
+        XLSX.writeFile(wb, "DanhSachUser.xlsx");
     }
 
     function updateUI(config) {
-        // FIX 2: Tự động khởi tạo mảng nếu history bị undefined
         if (!config.history) config.history = [];
-
-        document.getElementById('ball-display').innerText = 
-            (config.currentNum !== '--' && config.currentNum < 10) ? '0' + config.currentNum : config.currentNum;
+        document.getElementById('ball-display').innerText = (config.currentNum!=='--' && config.currentNum<10) ? '0'+config.currentNum : config.currentNum;
         
         const histDiv = document.getElementById('hist-display');
-        if (config.history.length === 0) {
-            histDiv.innerHTML = 'Chưa quay số nào.';
-        } else {
-            histDiv.innerHTML = config.history.map(n => {
-                const numStr = n < 10 ? '0' + n : '' + n;
-                return `<div class="history-ball">${numStr}</div>`;
-            }).join('');
-        }
-        
-        const remaining = 90 - config.history.length;
-        document.getElementById('remaining-count').innerText = remaining;
-        
-        if (myRole === 'admin') {
-            const drawBtn = document.getElementById('draw-btn');
-            if (isDrawing) {
-                drawBtn.disabled = true;
-                drawBtn.innerText = '⏳ 1.5s...';
-                drawBtn.style.backgroundColor = '#607D8B';
-            } else {
-                drawBtn.disabled = false;
-                drawBtn.innerText = '🎲 QUAY';
-                drawBtn.style.backgroundColor = 'var(--gold)';
-            }
-        }
+        histDiv.innerHTML = config.history.length === 0 ? 'Chưa quay số nào.' : config.history.map(n => `<div class="history-ball">${n<10?'0'+n:n}</div>`).join('');
+        document.getElementById('remaining-count').innerText = 90 - config.history.length;
         
         if(config.state === 'ended' && config.winner && !isWinModalClosed) {
             document.getElementById('win-modal').style.display = 'flex';
@@ -852,19 +672,11 @@
         
         if(myRole === 'player' && myUser) {
             const userIsActive = currentUsers[myUser] && currentUsers[myUser].active;
-            if(!userIsActive) {
-                document.getElementById('waiting-approval').classList.remove('hidden');
-                document.getElementById('player-controls').classList.add('hidden');
-            } else {
-                document.getElementById('waiting-approval').classList.add('hidden');
-                document.getElementById('player-controls').classList.remove('hidden');
-                if(config.state === 'waiting') {
-                    document.getElementById('ticket-editor').classList.remove('hidden');
-                    document.getElementById('ticket-locked').classList.add('hidden');
-                } else {
-                    document.getElementById('ticket-editor').classList.add('hidden');
-                    document.getElementById('ticket-locked').classList.remove('hidden');
-                }
+            document.getElementById('waiting-approval').classList.toggle('hidden', userIsActive);
+            document.getElementById('player-controls').classList.toggle('hidden', !userIsActive);
+            if(userIsActive) {
+                document.getElementById('ticket-editor').classList.toggle('hidden', config.state !== 'waiting');
+                document.getElementById('ticket-locked').classList.toggle('hidden', config.state === 'waiting');
             }
         }
     }
@@ -872,157 +684,96 @@
     function updateUsersList(users) {
         const listDiv = document.getElementById('user-list');
         listDiv.innerHTML = '';
-        
-        let searchText = "";
-        let filterVal = "all";
+        let searchText = "", filterVal = "all";
         if(myRole === 'admin') {
-            const searchInput = document.getElementById('search-inp');
-            const filterSelect = document.getElementById('filter-select');
-            if (searchInput) searchText = searchInput.value.toLowerCase();
-            if (filterSelect) filterVal = filterSelect.value;
+            searchText = document.getElementById('search-inp').value.toLowerCase();
+            filterVal = document.getElementById('filter-select').value;
         }
 
-        let totalUserCount = 0;
-        let onlineCount = 0;
-        let displayedCount = 0;
-
+        let total=0, online=0, display=0;
         for(let u in users) {
             if(users[u].role === 'admin') continue; 
-            totalUserCount++;
-
+            total++;
             const user = users[u];
-            // LOGIC ONLINE MỚI: Dựa vào field isOnline
             const isOnline = user.isOnline === true;
-            if (isOnline) onlineCount++;
+            if (isOnline) online++;
             
             if(myRole === 'admin') {
                 if(searchText && !u.includes(searchText)) continue;
                 if(filterVal === 'online' && !isOnline) continue;
                 if(filterVal === 'active' && !user.active) continue;
             } 
-
-            displayedCount++;
+            display++;
             
-            // Icon trạng thái Online/Offline
-            const statusDotClass = isOnline ? 'dot-online' : 'dot-offline';
-            const statusText = isOnline ? 'Online' : 'Offline';
-            const statusColor = isOnline ? 'var(--active-color)' : '#999';
-
-            // Trạng thái Duyệt (Kích hoạt)
-            const approvalIcon = user.active 
-                ? '<i class="fas fa-check-circle" title="Đã kích hoạt" style="color:var(--active-color)"></i>' 
-                : '<i class="fas fa-clock" title="Chờ duyệt" style="color:orange"></i>';
-            
-            const avatarUrl = generateAvatarUrl(u); 
-            const isActiveClass = user.active ? 'active' : 'inactive';
-            const isMeStyle = u === myUser ? 'border-left: 3px solid var(--gold) !important;' : '';
-
-            let div = document.createElement('div');
-            div.className = `user-item ${isActiveClass}`;
-            div.style.cssText = isMeStyle;
+            const div = document.createElement('div');
+            div.className = `user-item ${user.active ? 'active' : 'inactive'}`;
+            if(u === myUser) div.style.borderLeft = '3px solid var(--gold)';
             div.innerHTML = `
-                <img src="${avatarUrl}" class="u-avatar">
+                <img src="${generateAvatarUrl(u)}" class="u-avatar">
                 <div class="u-content">
-                    <div class="u-info">
-                        <span class="u-name">${u} ${u === myUser ? ' (BẠN)' : ''}</span>
-                        <div style="font-size:10px; color:${statusColor}; display:flex; align-items:center;">
-                            <span class="status-dot ${statusDotClass}"></span> ${statusText}
+                    <div class="u-info"><span class="u-name">${u}</span>
+                        <div style="font-size:10px; color:${isOnline?'var(--active-color)':'#999'}">
+                            <span class="status-dot ${isOnline?'dot-online':'dot-offline'}"></span> ${isOnline?'Online':'Offline'}
                         </div>
                     </div>
-                    <div class="u-actions u-status">
-                        ${approvalIcon}
-                    </div>
-                </div>
-            `;
+                    <div class="u-actions">${user.active ? '<i class="fas fa-check-circle" style="color:var(--active-color)"></i>' : '<i class="fas fa-clock" style="color:orange"></i>'}</div>
+                </div>`;
             listDiv.appendChild(div);
         }
-        
-        document.getElementById('count-display').innerText = myRole==='admin' ? `${displayedCount}/${totalUserCount}` : totalUserCount;
-        document.getElementById('online-count').innerText = onlineCount;
-        document.getElementById('total-users').innerText = totalUserCount;
+        document.getElementById('count-display').innerText = myRole==='admin' ? `${display}/${total}` : total;
+        document.getElementById('online-count').innerText = online;
+        document.getElementById('total-users').innerText = total;
     }
 
     function renderUI() {
-        const config = currentConfig;
-        const users = currentUsers;
-        
-        updateUI(config);
-        
+        updateUI(currentConfig);
         const stage = document.getElementById('stage');
-        const existingCards = Array.from(stage.children).filter(c => c.id !== 'waiting-approval');
-        existingCards.forEach(c => stage.removeChild(c));
+        Array.from(stage.children).forEach(c => { if(c.id !== 'waiting-approval') stage.removeChild(c); });
 
-        const usersToDisplay = Object.keys(users)
-            .filter(u => users[u].role !== 'admin')
-            .filter(u => users[u].active && users[u].ticket && users[u].ticket.length === TICKET_SIZE);
+        const usersToDisplay = Object.keys(currentUsers)
+            .filter(u => currentUsers[u].role !== 'admin')
+            .filter(u => currentUsers[u].active && currentUsers[u].ticket && currentUsers[u].ticket.length === TICKET_SIZE)
+            // LỌC MỚI: CHỈ HIỆN USER ĐANG ONLINE
+            .filter(u => currentUsers[u].isOnline === true);
         
         usersToDisplay.forEach(u => {
-            const user = users[u];
-            let completedRows = 0;
-            let cellsHTML = '';
-            let statusFooterHTML = '';
-            const history = config.history || []; // FIX NULL
+            const user = currentUsers[u];
+            let completedRows = 0, cellsHTML = '', statusFooterHTML = '';
+            const history = currentConfig.history || [];
             
             for (let i = 0; i < NUM_ROWS; i++) {
-                const rowStart = i * NUMBERS_PER_ROW; 
-                const rowEnd = rowStart + NUMBERS_PER_ROW; 
-                const row = user.ticket.slice(rowStart, rowEnd);
-                let rowHits = 0;
-                let rowHTML = '';
-                let missingNumber = null;
-
+                const row = user.ticket.slice(i*3, i*3+3);
+                let rowHits = 0, rowHTML = '', missingNumber = null;
                 row.forEach(n => {
                     const isHit = history.includes(n);
                     if(isHit) rowHits++;
-                    if(!isHit && missingNumber === null) missingNumber = n;
-                    const numStr = n < 10 ? '0' + n : '' + n;
-                    rowHTML += `<div class="t-cell ${isHit?'hit':''}">${numStr}</div>`;
+                    else if(missingNumber === null) missingNumber = n;
+                    rowHTML += `<div class="t-cell ${isHit?'hit':''}">${n<10?'0'+n:n}</div>`;
                 });
-                if (rowHits === NUMBERS_PER_ROW) completedRows++;
+                if (rowHits === 3) completedRows++;
                 cellsHTML += rowHTML;
-                if (rowHits === NUMBERS_PER_ROW - 1 && config.state !== 'ended' && !statusFooterHTML) { 
-                    statusFooterHTML = `<div class="status-footer pulse-wait" style="margin-top: 5px;">ĐANG CHỜ <span class="ball-icon"></span> (${missingNumber < 10 ? '0' + missingNumber : missingNumber})</div>`;
+                if (rowHits === 2 && currentConfig.state !== 'ended' && !statusFooterHTML) { 
+                    statusFooterHTML = `<div class="status-footer pulse-wait" style="margin-top: 5px;">CHỜ <span class="ball-icon"></span> (${missingNumber<10?'0'+missingNumber:missingNumber})</div>`;
                 }
             }
 
             const isWinner = (completedRows > 0); 
             const card = document.createElement('div');
             card.className = `ticket-card ${isWinner ? 'winner' : ''}`;
-            if (statusFooterHTML && config.state !== 'ended') card.classList.add('waiting-pulse');
+            if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
             if(u === myUser) card.style.borderTopColor = 'var(--gold)';
-            
-            // Thêm chấm xanh nếu user đang online
-            const onlineIndicator = user.isOnline 
-                ? '<span style="color:#00E676; font-size:10px; margin-left:5px;">●</span>' 
-                : '';
 
             card.innerHTML = `
-                <div class="t-header"><span>${u} ${onlineIndicator}</span><span>${isWinner ? 'KINH!' : ''}</span></div>
+                <div class="t-header"><span>${u} <span style="color:#00E676; font-size:10px;">●</span></span><span>${isWinner ? 'KINH!' : ''}</span></div>
                 <div class="t-grid">${cellsHTML}</div>
-                ${statusFooterHTML}
-            `;
+                ${statusFooterHTML}`;
             stage.appendChild(card);
         });
     }
 
-    function showCustomMessage(title, message) {
-        // (Giữ nguyên hàm này - đã rút gọn để code đỡ dài)
-        alert(`${title}: ${message}`); 
-    }
-    
-    function showCustomConfirm(title, message, callback) {
-        if(confirm(message)) callback();
-    }
-    
-    function forceCloseModal() {
-        isWinModalClosed = true;
-        document.getElementById('win-modal').style.display = 'none';
-    }
-
-    // ==== KHỞI TẠO ====
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeFirebase();
-    });
+    function showCustomMessage(title, message) { alert(`${title}: ${message}`); }
+    function forceCloseModal() { isWinModalClosed = true; document.getElementById('win-modal').style.display = 'none'; }
+    document.addEventListener('DOMContentLoaded', () => initializeFirebase());
 </script>
 </body>
 </html>
