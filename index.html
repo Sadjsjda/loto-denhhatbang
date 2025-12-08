@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang - Final V13</title>
+    <title>Đệ Nhất Bang - Final V14 (Internal)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -639,22 +639,32 @@
         if(gameState.history && gameState.history.length >= 90) {
             return alert("Đã quay hết 90 số!");
         }
-
-        // 2. YÊU CẦU: KIỂM TRA NGƯỜI CHƠI CHƯA SẴN SÀNG
-        // Lọc tìm người chơi: Không phải admin + Online + Active + Đã có vé + Chưa Ready
-        const unreadyUser = Object.values(usersData).find(u => 
+        
+        // --- YÊU CẦU MỚI: KIỂM TRA KHÔNG CÓ NGƯỜI CHƠI ONLINE ---
+        // Lọc ra những người chơi HỢP LỆ (Không phải admin, Online, Active)
+        const onlinePlayers = Object.values(usersData).filter(u => 
             u.role !== 'admin' && 
-            u.isOnline && 
-            u.active !== false && 
+            u.isOnline === true && 
+            u.active !== false
+        );
+
+        if (onlinePlayers.length === 0) {
+            return alert("Không thể quay! Cần ít nhất 1 người chơi đang online và đã kích hoạt.");
+        }
+
+
+        // 2. KIỂM TRA NGƯỜI CHƠI CHƯA SẴN SÀNG (Vé chưa chốt)
+        // Chỉ kiểm tra trong danh sách người chơi đang online
+        const unreadyUser = onlinePlayers.find(u => 
             u.ticket && u.ticket.length > 0 && 
             !u.isReady
         );
 
         if(unreadyUser) {
-            return alert(`Không thể quay! Thành viên [${unreadyUser.nickname}] chưa chốt vé.`);
+            return alert(`Không thể quay! Thành viên [${unreadyUser.nickname || unreadyUser.uid}] chưa chốt vé.`);
         }
 
-        // 3. YÊU CẦU: DELAY NÚT 1s, RA SỐ NGAY
+        // 3. YÊU CẦU: DELAY NÚT 1s, RA SỐ NGAY (Debounce logic)
         if(isDrawing) return; // Chặn nếu đang đếm lùi
         isDrawing = true;     // Khóa nút
         renderHeader();       // Render để nút xám đi
