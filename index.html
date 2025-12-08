@@ -3,35 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang - Final V8</title>
+    <title>Đệ Nhất Bang - Final V9</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
     <style>
-        /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
         :root { 
             --primary: #263238; 
-            --accent: #FFD54F; /* Vàng kim */  
+            --accent: #FFD54F; 
             --green: #2E7D32;   
             --red: #D32F2F;     
             --bg: #ECEFF1;      
             --sidebar-bg: #102027; 
-            --text-on-dark: #ECEFF1;
+            --orange-border: #FF6D00; /* Màu cam cho vé user */
         }
         
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
-        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #546E7A; border-radius: 3px; }
 
-        /* --- STYLE KIẾM HIỆP (REQ 1 & 2) --- */
+        /* --- STYLE KIẾM HIỆP --- */
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@900&display=swap');
 
         .sword-title {
-            font-family: 'Merriweather', serif; /* Font có chân đậm chất cổ điển */
+            font-family: 'Merriweather', serif;
             font-size: 32px;
             font-weight: 900;
             color: var(--red);
@@ -44,12 +41,14 @@
             border-bottom: 2px solid #546E7A;
         }
 
+        /* REQ 1: GOM CHỮ VÀO GIỮA */
         .couplet-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Canh giữa */
             align-items: center;
-            padding: 15px 5px;
+            padding: 15px 0;
             background: rgba(0,0,0,0.2);
+            gap: 15px; /* Khoảng cách giữa chữ và bóng */
         }
 
         .couplet-text {
@@ -57,16 +56,13 @@
             font-size: 14px;
             font-weight: bold;
             color: #CFD8DC;
-            width: 30px;
+            width: 25px; /* Thu hẹp chiều rộng cột chữ */
             text-align: center;
             line-height: 1.4;
             text-shadow: 1px 1px 2px black;
         }
         
-        .couplet-text span {
-            display: block; /* Xuống dòng từng chữ */
-            margin-bottom: 2px;
-        }
+        .couplet-text span { display: block; margin-bottom: 2px; }
 
         .current-ball {
             width: 80px;
@@ -81,83 +77,98 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 20px rgba(255, 213, 79, 0.6);
-            font-family: 'Segoe UI', sans-serif; /* Số vẫn để font thường cho dễ nhìn */
+            flex-shrink: 0;
         }
 
-        /* --- TOGGLE SWITCH (REQ 4) --- */
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--green); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-
-        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
+        /* --- LOGIN & MODALS --- */
         #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-top: 5px solid var(--accent); }
         .inp-std { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #CFD8DC; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;}
-        .inp-std:focus { border-color: var(--primary); }
         .btn-full { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
         .btn-login { background: var(--primary); color: white; }
         .btn-reg { background: white; border: 2px solid var(--primary); color: var(--primary); }
 
-        /* --- QUẢN LÝ USER MODAL --- */
+        /* Manager Modal */
         #user-manager-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
         .manager-box { background: white; width: 700px; max-height: 80vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
         .mgr-header { padding: 15px; background: var(--primary); color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .mgr-body { padding: 15px; overflow-y: auto; flex: 1; }
         .mgr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         .mgr-table th, .mgr-table td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
-        .mgr-table th { background: #f2f2f2; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--green); }
+        input:checked + .slider:before { transform: translateX(20px); }
         .btn-reset { padding: 4px 8px; background: orange; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
-        /* --- LAYOUT CHÍNH --- */
+        /* --- LAYOUT --- */
         .app-layout { display: flex; width: 100%; height: 100%; }
+        .sidebar { width: 360px; background: var(--sidebar-bg); color: #ECEFF1; display: flex; flex-direction: column; border-right: 4px solid var(--accent); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         
-        .sidebar { width: 360px; background: var(--sidebar-bg); color: var(--text-on-dark); display: flex; flex-direction: column; border-right: 4px solid var(--accent); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        
-        /* History Matrix */
         .history-section { border-top: 1px solid #37474F; padding: 10px; flex: 0 0 auto; max-height: 150px; display: flex; flex-direction: column; }
-        .hist-title { font-size: 11px; color: #90A4AE; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .hist-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; overflow-y: auto; padding-right: 5px; }
         .hist-item { background: #263238; color: var(--accent); text-align: center; padding: 4px; border-radius: 3px; font-weight: bold; font-size: 13px; border: 1px solid #37474F; animation: popIn 0.2s; }
 
-        /* User List */
         .user-panel { flex: 1; display: flex; flex-direction: column; border-top: 1px solid #37474F; min-height: 0; }
         .panel-header { padding: 8px 15px; font-size: 11px; font-weight: bold; color: #B0BEC5; background: #0c181d; display: flex; justify-content: space-between; }
         .user-list { flex: 1; overflow-y: auto; padding: 5px; }
         .u-item { display: flex; align-items: center; padding: 6px; margin-bottom: 2px; background: rgba(255,255,255,0.03); border-radius: 4px; }
         .u-avatar { width: 28px; height: 28px; border-radius: 50%; margin-right: 8px; border: 1px solid #546E7A; }
-        .u-info { flex: 1; overflow: hidden; }
-        .u-name { font-size: 13px; font-weight: 600; color: #E0E0E0; }
+        .u-name { font-size: 13px; font-weight: 600; color: #E0E0E0; flex: 1; }
         .btn-edit-nick { background: none; border: none; color: #78909C; cursor: pointer; font-size: 10px; margin-left: 5px; }
-        .btn-edit-nick:hover { color: var(--accent); }
 
-        /* Log Panel */
         .log-panel { height: 120px; background: #000; border-top: 2px solid var(--accent); display: flex; flex-direction: column; font-size: 11px; font-family: monospace; }
         .log-list { padding: 8px; overflow-y: auto; color: #B0BEC5; }
-        .log-row { margin-bottom: 3px; border-bottom: 1px dashed #333; }
-        .log-row span.win { color: var(--accent); }
-
-        /* Admin Controls */
         .admin-controls { padding: 10px; background: #263238; border-top: 1px solid #455A64; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .btn-adm { padding: 8px; border: none; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 11px; }
 
-        /* 2. MAIN CONTENT */
         .main-content { flex: 1; display: flex; flex-direction: column; background: #f5f5f5; }
         .stage-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 15px; }
 
-        /* VÉ SỐ 4x4 */
-        .ticket { width: 200px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-top: 5px solid #B0BEC5; position: relative; height: fit-content; transition: 0.3s; }
-        .ticket.is-me { border-top-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); border: 2px solid var(--primary); z-index: 10; }
-        .ticket.winner { border-color: var(--red); background: #FFEBEE; animation: pulseRed 1s infinite; transform: scale(1.05); z-index: 20; }
+        /* --- TICKET STYLES --- */
+        .ticket { 
+            width: 200px; 
+            background: white; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+            border-top: 5px solid #B0BEC5; 
+            position: relative; 
+            height: fit-content; 
+            transition: 0.3s; 
+        }
+
+        /* REQ 3: VÉ CỦA USER MÀU CAM */
+        .ticket.is-me { 
+            border: 3px solid var(--orange-border) !important; /* Viền cam toàn bộ */
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 25px rgba(255, 109, 0, 0.3); /* Bóng đổ cam */
+            z-index: 10; 
+        }
+
+        .ticket.winner { border-color: var(--red) !important; background: #FFEBEE; animation: pulseRed 1s infinite; transform: scale(1.05); z-index: 20; }
         
         .t-header { padding: 8px; background: #ECEFF1; font-size: 13px; font-weight: bold; color: #37474F; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+        
         .t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #CFD8DC; padding: 2px; }
-        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: #455A64; }
+        
+        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: #455A64; position: relative; }
         .t-cell.hit { background: var(--red); color: white; }
         .t-cell.empty { background: #ECEFF1; }
+
+        /* REQ 4: HIỆU ỨNG NHẤP NHÁY CHO Ô CHỜ */
+        @keyframes cellBlink {
+            0% { background: #FFF3E0; color: #E65100; transform: scale(1); }
+            50% { background: #FFCC80; color: #E65100; transform: scale(1.1); box-shadow: 0 0 5px orange; z-index: 2; }
+            100% { background: #FFF3E0; color: #E65100; transform: scale(1); }
+        }
+        .t-cell.waiting {
+            animation: cellBlink 1s infinite;
+            border: 1px solid var(--orange-border);
+            color: var(--orange-border);
+        }
 
         .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 5; }
         .btn-create { background: var(--primary); color: white; padding: 8px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; animation: float 2s infinite; font-size: 12px; }
@@ -194,14 +205,7 @@
         <div class="mgr-body">
             <button onclick="exportExcel()" style="padding:10px; background:#2E7D32; color:white; border:none; border-radius:4px; margin-bottom:10px; cursor:pointer;"><i class="fas fa-file-excel"></i> Xuất Excel</button>
             <table class="mgr-table">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">Active</th> <th>Username</th>
-                        <th>Biệt Danh</th>
-                        <th>Pass</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+                <thead><tr><th style="width:50px">Active</th><th>Username</th><th>Biệt Danh</th><th>Pass</th><th>Action</th></tr></thead>
                 <tbody id="mgr-table-body"></tbody>
             </table>
         </div>
@@ -225,7 +229,6 @@
 </div>
 
 <div class="app-layout">
-    
     <div class="sidebar">
         <div class="brand-area" style="padding-top: 20px;">
             <div class="sword-title">ĐỆ NHẤT BANG</div>
@@ -238,7 +241,7 @@
                     <span>ĐẲNG</span><span>CẤP</span><span>LÀ</span><span>MÃI</span><span>MÃI</span>
                 </div>
             </div>
-            <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:5px;">ĐANG CHỜ</div>
+            <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:5px; text-align:center">ĐANG CHỜ</div>
         </div>
 
         <div class="history-section">
@@ -281,7 +284,6 @@
     let usersData = {};
     let isDrawing = false;
 
-    // --- 1. AUTH & INIT ---
     function handleLogin() {
         const u = document.getElementById('inp-user').value.trim().toLowerCase();
         const p = document.getElementById('inp-pass').value;
@@ -290,8 +292,6 @@
         db.ref('users/' + u).once('value', snap => {
             const val = snap.val();
             if(snap.exists() && val.pass == p) {
-                // Check Active (Nếu muốn chặn đăng nhập khi inactive thì uncomment dòng dưới)
-                // if(val.active === false) return alert("Tài khoản đang bị khóa!"); 
                 loginSuccess(u, val);
             } else { alert("Sai thông tin!"); }
         });
@@ -309,7 +309,7 @@
                 pass: p,
                 nickname: u,
                 role: (u === ADMIN_USER) ? 'admin' : 'player',
-                active: true, // Mặc định là active
+                active: true,
                 isOnline: true,
                 ticket: null,
                 isReady: false
@@ -325,7 +325,6 @@
         document.getElementById('login-modal').classList.add('hidden');
 
         if(!data.nickname) db.ref('users/' + uid).update({ nickname: uid });
-        // Đảm bảo có trường active
         if(data.active === undefined) db.ref('users/' + uid).update({ active: true });
 
         db.ref('users/' + myID).update({ isOnline: true });
@@ -348,7 +347,6 @@
         });
     }
 
-    // --- 2. LOGIC GAME ---
     function initGameListeners() {
         db.ref('gameState').on('value', snap => {
             gameState = snap.val() || { status: 'waiting', history: [], current: '--' };
@@ -368,7 +366,6 @@
             usersData = snap.val() || {};
             renderUserList();
             renderTickets();
-            // Nếu đang mở bảng quản lý thì render lại luôn
             if(document.getElementById('user-manager-modal').style.display !== 'none') {
                 renderManagerTable();
             }
@@ -383,7 +380,6 @@
         });
     }
 
-    // --- 3. RENDER UI ---
     function renderHeader() {
         document.getElementById('ball-display').innerText = (gameState.current < 10 && gameState.current !== '--') ? '0'+gameState.current : gameState.current;
         document.getElementById('status-text').innerText = (gameState.status === 'playing') ? "ĐANG QUAY..." : "ĐANG CHỜ";
@@ -402,10 +398,7 @@
 
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
-            // Chỉ hiện người chơi online & active (tùy chọn) trong danh sách chính
             if(u.role === 'admin') return;
-            // Nếu Inactive thì ẩn khỏi danh sách online luôn cho gọn? Hoặc hiện mờ.
-            // Ở đây tôi để ẩn nếu không online.
             if(!u.isOnline && uid !== myID) return;
 
             count++;
@@ -413,11 +406,8 @@
             div.className = 'u-item';
             
             let icon = !u.ticket ? '<i class="fas fa-plus" style="color:#777"></i>' : (!u.isReady ? '<i class="fas fa-edit" style="color:orange"></i>' : '<i class="fas fa-check" style="color:var(--green)"></i>');
-            
             const displayName = u.nickname || uid;
-            let editBtn = (uid === myID) ? `<button class="btn-edit-nick" onclick="changeNickname()" title="Đổi biệt danh"><i class="fas fa-pen"></i></button>` : '';
-
-            // Nếu bị inactive thì hiện màu đỏ
+            let editBtn = (uid === myID) ? `<button class="btn-edit-nick" onclick="changeNickname()"><i class="fas fa-pen"></i></button>` : '';
             let nameStyle = u.active === false ? 'color: #ef5350; text-decoration: line-through;' : '';
 
             div.innerHTML = `
@@ -445,13 +435,15 @@
         sortedIDs.forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
-            // Chỉ hiện vé nếu User Active và Online (hoặc là chính mình)
             if((!u.isOnline || u.active === false) && uid !== myID) return;
 
             const isMe = (uid === myID);
             const hasTicket = u.ticket && u.ticket.length === 16;
             let isWinner = false;
             let gridHTML = `<div class="t-grid">`;
+            
+            // REQ 4: Logic Tìm ô Chờ (Waiting)
+            let waitingIndices = [];
 
             if(!hasTicket) {
                 for(let i=0; i<16; i++) gridHTML += `<div class="t-cell empty"></div>`;
@@ -462,21 +454,43 @@
                     [0,4,8,12], [1,5,9,13], [2,6,10,14], [3,7,11,15], 
                     [0,5,10,15], [3,6,9,12]
                 ];
+                
+                // Check win
                 isWinner = patterns.some(pat => pat.every(idx => hits[idx]));
-                u.ticket.forEach((n, i) => gridHTML += `<div class="t-cell ${hits[i]?'hit':''}">${n}</div>`);
+
+                // Check waiting (Nếu đã trúng 3/4)
+                if(!isWinner && gameState.status === 'playing') {
+                    patterns.forEach(pat => {
+                        const hitCount = pat.filter(idx => hits[idx]).length;
+                        if(hitCount === 3) {
+                            // Tìm ô chưa trúng
+                            const missingIdx = pat.find(idx => !hits[idx]);
+                            if(missingIdx !== undefined && !waitingIndices.includes(missingIdx)) {
+                                waitingIndices.push(missingIdx);
+                            }
+                        }
+                    });
+                }
+
+                u.ticket.forEach((n, i) => {
+                    let classes = "t-cell";
+                    if(hits[i]) classes += " hit";
+                    else if(waitingIndices.includes(i)) classes += " waiting"; // Thêm class nhấp nháy
+                    gridHTML += `<div class="${classes}">${n}</div>`;
+                });
             }
             gridHTML += `</div>`;
 
             if(isWinner && gameState.status === 'playing' && (isMe || myRole==='admin')) handleWin(u.nickname || uid);
 
             const card = document.createElement('div');
+            // Class 'is-me' có viền cam (trong CSS)
             card.className = `ticket ${isMe?'is-me':''} ${isWinner?'winner':''}`;
             
             let footer = '';
             if(isMe) {
-                // Nếu mình bị inactive thì chặn
                 if(u.active === false) {
-                    gridHTML += `<div class="create-overlay"><span>TÀI KHOẢN BỊ KHÓA</span></div>`;
+                    gridHTML += `<div class="create-overlay"><span>BỊ KHÓA</span></div>`;
                 } else {
                     if(!hasTicket) gridHTML += `<div class="create-overlay"><button class="btn-create" onclick="createTicket()">TẠO VÉ</button></div>`;
                     else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer" style="display:flex; gap:5px"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
@@ -492,7 +506,6 @@
         });
     }
 
-    // --- 4. PLAYER ACTIONS ---
     function createTicket() {
         if(gameState.status !== 'waiting') return alert("Ván đang chạy!");
         const nums = [];
@@ -519,18 +532,29 @@
     }
     function pad(n){return n<10?'0'+n:n}
 
-    // --- 5. ADMIN ACTIONS ---
+    // --- REQ 2: DELAY 1S KHI QUAY ---
     function adminDraw() {
         if(myRole !== 'admin') return;
         if(gameState.status === 'ended') return alert("Reset bàn trước!");
+        
+        // Bật cờ đang quay để chặn bấm liên tục
+        if(isDrawing) return;
         isDrawing = true;
+
         if(gameState.status === 'waiting') db.ref('gameState').update({ status: 'playing' });
         
-        let r;
-        do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
-        const nh = [...gameState.history, r];
-        db.ref('gameState').update({ current: r, history: nh });
-        setTimeout(()=>isDrawing=false, 500);
+        // Chỉ hiện visual trạng thái "Đang quay" nhưng chưa ra số ngay
+        // Nút bấm có thể disable visual tạm thời
+        
+        setTimeout(() => {
+            let r;
+            do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
+            const nh = [...gameState.history, r];
+            
+            db.ref('gameState').update({ current: r, history: nh });
+            
+            isDrawing = false;
+        }, 1000); // Delay 1000ms (1 giây)
     }
 
     function adminReset() {
@@ -547,7 +571,6 @@
         }
     }
 
-    // --- 6. USER MANAGER (REQ 4 UPDATED: Toggle Active) ---
     function openUserManager() {
         document.getElementById('user-manager-modal').style.display = 'flex';
         renderManagerTable();
@@ -561,7 +584,6 @@
             if(u.role === 'admin') return;
             const tr = document.createElement('tr');
             
-            // Toggle Switch
             const isChecked = (u.active !== false) ? 'checked' : '';
             
             tr.innerHTML = `
@@ -585,10 +607,9 @@
     }
 
     function resetPass(uid) {
-        if(confirm("Đặt lại mật khẩu cho " + uid + " thành 'denhatmaidinh'?")) {
+        if(confirm("Reset mật khẩu về 'denhatmaidinh'?")) {
             db.ref('users/' + uid).update({ pass: 'denhatmaidinh' });
             renderManagerTable();
-            alert("Đã reset xong!");
         }
     }
 
@@ -597,12 +618,11 @@
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
             if(u.role !== 'admin') {
-                // Thêm trạng thái Active vào Excel
                 data.push({ 
                     "Username": uid, 
                     "Biệt Danh": u.nickname || uid, 
                     "Mật Khẩu": u.pass,
-                    "Trạng Thái": (u.active !== false ? "Active" : "Inactive")
+                    "Active": (u.active !== false ? "Yes" : "No")
                 });
             }
         });
