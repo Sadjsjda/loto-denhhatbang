@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang - Final V12</title>
+    <title>Đệ Nhất Bang - Final V13</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -155,9 +155,16 @@
             box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
             animation: pulse 2s infinite;
         }
-        .btn-spin:disabled { background: #555; color: #aaa; animation: none; box-shadow: none; cursor: not-allowed; }
+        /* Style cho nút disabled (khi chờ 1s hoặc hết game) */
+        .btn-spin:disabled { 
+            background: #555 !important; 
+            color: #aaa !important; 
+            animation: none !important; 
+            box-shadow: none !important; 
+            cursor: not-allowed; 
+        }
 
-        /* --- USER LIST BÊN PHẢI (UPDATED REQ 2) --- */
+        /* --- USER LIST BÊN PHẢI --- */
         .right-header {
             padding: 10px;
             background: #102027;
@@ -362,7 +369,7 @@
     let myRole = 'player';
     let gameState = { status: 'waiting', history: [], current: '--' };
     let usersData = {};
-    let isDrawing = false;
+    let isDrawing = false; // Biến cờ kiểm tra delay 1s
 
     function handleLogin() {
         const u = document.getElementById('inp-user').value.trim().toLowerCase();
@@ -371,7 +378,6 @@
         db.ref('users/' + u).once('value', snap => {
             const val = snap.val();
             if(snap.exists() && val.pass == p) {
-                // Cho phép login kể cả inactive (nhưng sẽ thấy thông báo bị khóa)
                 loginSuccess(u, val);
             } else alert("Sai thông tin!");
         });
@@ -384,7 +390,7 @@
         if(/[^a-z0-9]/.test(u)) return alert("User chỉ gồm chữ thường số!");
         db.ref('users/' + u).once('value', snap => {
             if(snap.exists()) return alert("User đã tồn tại!");
-            const newUser = { pass: p, nickname: u, role: (u === ADMIN_USER)?'admin':'player', active: false, isOnline: true, ticket: null, isReady: false }; // Mặc định active: false (chờ duyệt)
+            const newUser = { pass: p, nickname: u, role: (u === ADMIN_USER)?'admin':'player', active: false, isOnline: true, ticket: null, isReady: false };
             db.ref('users/' + u).set(newUser).then(() => loginSuccess(u, newUser));
         });
     }
@@ -450,11 +456,20 @@
         });
     }
 
+    // --- CẬP NHẬT HEADER (Xử lý visual nút bấm) ---
     function renderHeader() {
         document.getElementById('ball-display').innerText = (gameState.current < 10 && gameState.current !== '--') ? '0'+gameState.current : gameState.current;
         document.getElementById('status-text').innerText = (gameState.status === 'playing') ? "ĐANG QUAY..." : "ĐANG CHỜ";
+        
         const btnSpin = document.getElementById('btn-spin');
-        btnSpin.disabled = (gameState.status === 'ended');
+        // Nút bị Disable nếu: Game kết thúc HOẶC đang chờ 1s (isDrawing)
+        if (gameState.status === 'ended' || isDrawing) {
+            btnSpin.disabled = true;
+            if(isDrawing) btnSpin.innerText = "CHỜ 1S..."; 
+        } else {
+            btnSpin.disabled = false;
+            btnSpin.innerText = "QUAY SỐ";
+        }
     }
 
     function renderHistoryModal() {
@@ -463,13 +478,11 @@
         ).join('');
     }
 
-    // --- UPDATED REQ 2: LIST FULL USERS ---
     function renderUserList() {
         const container = document.getElementById('user-list-el');
         container.innerHTML = '';
         let count = 0;
         
-        // Sắp xếp: Tôi -> Online -> Offline
         const sortedIDs = Object.keys(usersData).sort((a, b) => {
             const uA = usersData[a];
             const uB = usersData[b];
@@ -487,7 +500,6 @@
             count++;
             const div = document.createElement('div');
             
-            // Xử lý class theo trạng thái
             let itemClass = 'u-item-compact';
             let iconStatus = '';
             
@@ -496,7 +508,6 @@
                 iconStatus = '<i class="fas fa-ban" style="color:red"></i>';
             } else if (u.isOnline) {
                 itemClass += ' is-online';
-                // Kiểm tra trạng thái vé nếu online
                 if (!u.ticket) iconStatus = '<i class="fas fa-plus" style="color:#aaa"></i>';
                 else if (!u.isReady) iconStatus = '<i class="fas fa-pen" style="color:orange"></i>';
                 else iconStatus = '<i class="fas fa-check" style="color:var(--green)"></i>';
@@ -507,8 +518,6 @@
 
             const name = u.nickname || uid;
             let editBtn = (uid===myID) ? `<i class="fas fa-edit" style="cursor:pointer; margin-left:5px" onclick="changeNick()"></i>` : '';
-            
-            // Nếu inactive thì gạch tên
             const nameStyle = u.active === false ? 'text-decoration:line-through' : '';
 
             div.className = itemClass;
@@ -535,9 +544,6 @@
         sortedIDs.forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
-            
-            // Chỉ hiện vé của User Online + Active (để đỡ rối, user offline thì ẩn vé đi)
-            // Hoặc là chính mình (dù bị inactive vẫn hiện để thấy thông báo)
             if((!u.isOnline || u.active === false) && uid !== myID) return;
 
             const isMe = (uid === myID);
@@ -624,20 +630,47 @@
     }
     function pad(n){return n<10?'0'+n:n}
 
+    // --- LOGIC QUAY SỐ (ĐÃ CHỈNH SỬA) ---
     function adminDraw() {
         if(myRole !== 'admin') return;
         if(gameState.status === 'ended') return alert("Reset bàn trước!");
-        if(isDrawing) return;
-        isDrawing = true;
+
+        // 1. Kiểm tra nếu đã hết số (90 số)
+        if(gameState.history && gameState.history.length >= 90) {
+            return alert("Đã quay hết 90 số!");
+        }
+
+        // 2. YÊU CẦU: KIỂM TRA NGƯỜI CHƠI CHƯA SẴN SÀNG
+        // Lọc tìm người chơi: Không phải admin + Online + Active + Đã có vé + Chưa Ready
+        const unreadyUser = Object.values(usersData).find(u => 
+            u.role !== 'admin' && 
+            u.isOnline && 
+            u.active !== false && 
+            u.ticket && u.ticket.length > 0 && 
+            !u.isReady
+        );
+
+        if(unreadyUser) {
+            return alert(`Không thể quay! Thành viên [${unreadyUser.nickname}] chưa chốt vé.`);
+        }
+
+        // 3. YÊU CẦU: DELAY NÚT 1s, RA SỐ NGAY
+        if(isDrawing) return; // Chặn nếu đang đếm lùi
+        isDrawing = true;     // Khóa nút
+        renderHeader();       // Render để nút xám đi
 
         if(gameState.status === 'waiting') db.ref('gameState').update({ status: 'playing' });
         
+        // Ra số ngay lập tức
+        let r;
+        do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
+        const nh = [...gameState.history, r];
+        db.ref('gameState').update({ current: r, history: nh });
+        
+        // Hẹn giờ mở lại nút sau 1 giây
         setTimeout(() => {
-            let r;
-            do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
-            const nh = [...gameState.history, r];
-            db.ref('gameState').update({ current: r, history: nh });
             isDrawing = false;
+            renderHeader(); // Render để nút sáng lại
         }, 1000); 
     }
 
@@ -660,7 +693,6 @@
         renderManagerTable();
     }
     
-    // --- UPDATED REQ 1: ẨN PASS ---
     function renderManagerTable() {
         const tbody = document.getElementById('mgr-table-body');
         tbody.innerHTML = '';
@@ -681,7 +713,6 @@
     function toggleActive(u, s) { db.ref('users/'+u).update({active:s}); }
     function resetPass(u) { if(confirm("Reset pass?")) db.ref('users/'+u).update({pass:'denhatmaidinh'}); }
     
-    // --- EXCEL VẪN GIỮ PASS ---
     function exportExcel() {
         const data = [];
         Object.keys(usersData).forEach(uid => {
