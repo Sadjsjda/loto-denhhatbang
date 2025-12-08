@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Game - Final V7</title>
+    <title>Đệ Nhất Bang - Final V8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -14,7 +14,7 @@
         /* --- CẤU HÌNH GIAO DIỆN CHUNG --- */
         :root { 
             --primary: #263238; 
-            --accent: #FFC107;  
+            --accent: #FFD54F; /* Vàng kim */  
             --green: #2E7D32;   
             --red: #D32F2F;     
             --bg: #ECEFF1;      
@@ -27,7 +27,73 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #546E7A; border-radius: 3px; }
 
-        /* --- MÀN HÌNH ĐĂNG NHẬP (REQ 5) --- */
+        /* --- STYLE KIẾM HIỆP (REQ 1 & 2) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@900&display=swap');
+
+        .sword-title {
+            font-family: 'Merriweather', serif; /* Font có chân đậm chất cổ điển */
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--red);
+            text-transform: uppercase;
+            text-align: center;
+            margin: 0;
+            padding-bottom: 10px;
+            text-shadow: 2px 2px 0px #FFD54F, -1px -1px 0 #000;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #546E7A;
+        }
+
+        .couplet-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .couplet-text {
+            font-family: 'Merriweather', serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #CFD8DC;
+            width: 30px;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        .couplet-text span {
+            display: block; /* Xuống dòng từng chữ */
+            margin-bottom: 2px;
+        }
+
+        .current-ball {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            border: 5px solid var(--red);
+            color: var(--red);
+            font-size: 40px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 213, 79, 0.6);
+            font-family: 'Segoe UI', sans-serif; /* Số vẫn để font thường cho dễ nhìn */
+        }
+
+        /* --- TOGGLE SWITCH (REQ 4) --- */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--green); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+
+        /* --- MÀN HÌNH ĐĂNG NHẬP --- */
         #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-top: 5px solid var(--accent); }
         .inp-std { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #CFD8DC; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;}
@@ -36,30 +102,22 @@
         .btn-login { background: var(--primary); color: white; }
         .btn-reg { background: white; border: 2px solid var(--primary); color: var(--primary); }
 
-        /* --- QUẢN LÝ USER MODAL (REQ 4) --- */
+        /* --- QUẢN LÝ USER MODAL --- */
         #user-manager-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
-        .manager-box { background: white; width: 600px; max-height: 80vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+        .manager-box { background: white; width: 700px; max-height: 80vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
         .mgr-header { padding: 15px; background: var(--primary); color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .mgr-body { padding: 15px; overflow-y: auto; flex: 1; }
         .mgr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .mgr-table th, .mgr-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .mgr-table th, .mgr-table td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
         .mgr-table th { background: #f2f2f2; }
         .btn-reset { padding: 4px 8px; background: orange; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
 
         /* --- LAYOUT CHÍNH --- */
         .app-layout { display: flex; width: 100%; height: 100%; }
         
-        /* 1. SIDEBAR */
-        .sidebar { width: 340px; background: var(--sidebar-bg); color: var(--text-on-dark); display: flex; flex-direction: column; border-right: 4px solid var(--accent); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .sidebar { width: 360px; background: var(--sidebar-bg); color: var(--text-on-dark); display: flex; flex-direction: column; border-right: 4px solid var(--accent); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         
-        .brand-area { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); border-bottom: 1px solid #37474F; }
-        .brand-title { font-size: 28px; font-weight: 900; color: var(--accent); letter-spacing: 2px; margin: 0; text-shadow: 2px 2px 0px #000; }
-        
-        /* Ball & Status */
-        .ball-stage { display: flex; justify-content: center; padding: 15px 0; align-items: center; gap: 15px; }
-        .current-ball { width: 70px; height: 70px; background: white; border-radius: 50%; border: 5px solid var(--red); color: var(--red); font-size: 35px; font-weight: bold; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(255, 193, 7, 0.4); }
-        
-        /* REQ 2: History Matrix 5 Cols */
+        /* History Matrix */
         .history-section { border-top: 1px solid #37474F; padding: 10px; flex: 0 0 auto; max-height: 150px; display: flex; flex-direction: column; }
         .hist-title { font-size: 11px; color: #90A4AE; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
         .hist-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; overflow-y: auto; padding-right: 5px; }
@@ -101,14 +159,11 @@
         .t-cell.hit { background: var(--red); color: white; }
         .t-cell.empty { background: #ECEFF1; }
 
-        /* Controls on Ticket */
         .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 5; }
         .btn-create { background: var(--primary); color: white; padding: 8px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; animation: float 2s infinite; font-size: 12px; }
-        
         .t-footer { padding: 5px; background: white; }
         .btn-act { width: 48%; padding: 5px; border: none; border-radius: 3px; color: white; font-weight: bold; cursor: pointer; font-size: 11px; }
 
-        /* Win Popup */
         #win-popup { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; }
         
         .hidden { display: none !important; }
@@ -139,7 +194,14 @@
         <div class="mgr-body">
             <button onclick="exportExcel()" style="padding:10px; background:#2E7D32; color:white; border:none; border-radius:4px; margin-bottom:10px; cursor:pointer;"><i class="fas fa-file-excel"></i> Xuất Excel</button>
             <table class="mgr-table">
-                <thead><tr><th>Username</th><th>Biệt Danh</th><th>Pass</th><th>Action</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Active</th> <th>Username</th>
+                        <th>Biệt Danh</th>
+                        <th>Pass</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
                 <tbody id="mgr-table-body"></tbody>
             </table>
         </div>
@@ -148,7 +210,8 @@
 
 <div id="login-modal">
     <div class="login-box">
-        <h2 style="color: var(--primary); margin-top:0;">ĐỆ NHẤT GAME</h2> <input type="text" id="inp-user" class="inp-std" placeholder="Tên đăng nhập (Viết liền)">
+        <h2 style="color: var(--primary); margin-top:0;">ĐỆ NHẤT GAME</h2>
+        <input type="text" id="inp-user" class="inp-std" placeholder="Tên đăng nhập (Viết liền)">
         <input type="password" id="inp-pass" class="inp-std" placeholder="Mật khẩu">
         <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
         <button class="btn-full btn-reg" onclick="handleRegister()">ĐĂNG KÝ MỚI</button>
@@ -164,18 +227,23 @@
 <div class="app-layout">
     
     <div class="sidebar">
-        <div class="brand-area">
-            <h1 class="brand-title">LÔ TÔ</h1>
-            <div class="ball-stage">
+        <div class="brand-area" style="padding-top: 20px;">
+            <div class="sword-title">ĐỆ NHẤT BANG</div>
+            <div class="couplet-container">
+                <div class="couplet-text">
+                    <span>PHONG</span><span>ĐỘ</span><span>LÀ</span><span>NHẤT</span><span>THỜI</span>
+                </div>
                 <div class="current-ball" id="ball-display">--</div>
+                <div class="couplet-text">
+                    <span>ĐẲNG</span><span>CẤP</span><span>LÀ</span><span>MÃI</span><span>MÃI</span>
+                </div>
             </div>
-            <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase">ĐANG CHỜ</div>
+            <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:5px;">ĐANG CHỜ</div>
         </div>
 
         <div class="history-section">
             <div class="hist-title">Số đã xổ</div>
-            <div class="hist-grid" id="history-grid">
-                </div>
+            <div class="hist-grid" id="history-grid"></div>
         </div>
 
         <div class="user-panel">
@@ -193,7 +261,8 @@
         <div id="admin-panel" class="admin-controls hidden">
             <button class="btn-adm" style="background:var(--accent); color:black" onclick="adminDraw()">QUAY SỐ</button>
             <button class="btn-adm" style="background:var(--red)" onclick="adminReset()">RESET BÀN</button>
-            <button class="btn-adm" style="background:#1976D2; grid-column: span 2" onclick="openUserManager()">QUẢN LÝ USER</button> </div>
+            <button class="btn-adm" style="background:#1976D2; grid-column: span 2" onclick="openUserManager()">QUẢN LÝ USER</button>
+        </div>
         <div style="padding:5px; background:#0c181d">
             <button class="btn-adm" style="width:100%; background:#37474F" onclick="doLogout()">ĐĂNG XUẤT</button>
         </div>
@@ -219,8 +288,11 @@
         if(!u || !p) return alert("Nhập đủ thông tin!");
 
         db.ref('users/' + u).once('value', snap => {
-            if(snap.exists() && snap.val().pass == p) {
-                loginSuccess(u, snap.val());
+            const val = snap.val();
+            if(snap.exists() && val.pass == p) {
+                // Check Active (Nếu muốn chặn đăng nhập khi inactive thì uncomment dòng dưới)
+                // if(val.active === false) return alert("Tài khoản đang bị khóa!"); 
+                loginSuccess(u, val);
             } else { alert("Sai thông tin!"); }
         });
     }
@@ -235,8 +307,9 @@
             if(snap.exists()) return alert("Username đã tồn tại!");
             const newUser = {
                 pass: p,
-                nickname: u, // REQ 3: Mặc định nickname = username
+                nickname: u,
                 role: (u === ADMIN_USER) ? 'admin' : 'player',
+                active: true, // Mặc định là active
                 isOnline: true,
                 ticket: null,
                 isReady: false
@@ -251,16 +324,14 @@
         sessionStorage.setItem('loto_id', myID);
         document.getElementById('login-modal').classList.add('hidden');
 
-        // FIX REQ 1: Nếu user cũ chưa có nickname, update ngay
-        if(!data.nickname) {
-            db.ref('users/' + uid).update({ nickname: uid });
-        }
+        if(!data.nickname) db.ref('users/' + uid).update({ nickname: uid });
+        // Đảm bảo có trường active
+        if(data.active === undefined) db.ref('users/' + uid).update({ active: true });
 
         db.ref('users/' + myID).update({ isOnline: true });
         db.ref('users/' + myID + '/isOnline').onDisconnect().set(false);
 
         if(myRole === 'admin') document.getElementById('admin-panel').classList.remove('hidden');
-
         initGameListeners();
     }
 
@@ -270,7 +341,6 @@
         location.reload();
     }
 
-    // Auto Login
     const savedID = sessionStorage.getItem('loto_id');
     if(savedID) {
         db.ref('users/' + savedID).once('value', snap => {
@@ -298,6 +368,10 @@
             usersData = snap.val() || {};
             renderUserList();
             renderTickets();
+            // Nếu đang mở bảng quản lý thì render lại luôn
+            if(document.getElementById('user-manager-modal').style.display !== 'none') {
+                renderManagerTable();
+            }
         });
 
         db.ref('winLogs').limitToLast(10).on('value', snap => {
@@ -314,14 +388,10 @@
         document.getElementById('ball-display').innerText = (gameState.current < 10 && gameState.current !== '--') ? '0'+gameState.current : gameState.current;
         document.getElementById('status-text').innerText = (gameState.status === 'playing') ? "ĐANG QUAY..." : "ĐANG CHỜ";
 
-        // REQ 2: Render History Matrix 5 Cols inside Sidebar
         const histContainer = document.getElementById('history-grid');
-        // Tạo lưới số đã xổ. Đảo ngược để số mới nhất ở cuối hoặc đầu tùy ý. 
-        // User yêu cầu "thanh lăn khi quá dài", tức là danh sách cứ dài ra.
         histContainer.innerHTML = gameState.history.map(n => 
             `<div class="hist-item">${n < 10 ? '0'+n : n}</div>`
         ).join('');
-        // Auto scroll to bottom
         histContainer.scrollTop = histContainer.scrollHeight;
     }
 
@@ -332,23 +402,27 @@
 
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
+            // Chỉ hiện người chơi online & active (tùy chọn) trong danh sách chính
             if(u.role === 'admin') return;
+            // Nếu Inactive thì ẩn khỏi danh sách online luôn cho gọn? Hoặc hiện mờ.
+            // Ở đây tôi để ẩn nếu không online.
             if(!u.isOnline && uid !== myID) return;
 
             count++;
             const div = document.createElement('div');
             div.className = 'u-item';
             
-            // Icon Status
             let icon = !u.ticket ? '<i class="fas fa-plus" style="color:#777"></i>' : (!u.isReady ? '<i class="fas fa-edit" style="color:orange"></i>' : '<i class="fas fa-check" style="color:var(--green)"></i>');
             
-            // REQ 1 & 3: Hiển thị Biệt danh (Fallback Username) + Nút sửa
             const displayName = u.nickname || uid;
             let editBtn = (uid === myID) ? `<button class="btn-edit-nick" onclick="changeNickname()" title="Đổi biệt danh"><i class="fas fa-pen"></i></button>` : '';
 
+            // Nếu bị inactive thì hiện màu đỏ
+            let nameStyle = u.active === false ? 'color: #ef5350; text-decoration: line-through;' : '';
+
             div.innerHTML = `
                 <img src="https://ui-avatars.com/api/?name=${displayName}&background=random&color=fff&size=28" class="u-avatar">
-                <div class="u-info"><div class="u-name">${displayName} ${editBtn}</div></div>
+                <div class="u-info"><div class="u-name" style="${nameStyle}">${displayName} ${editBtn}</div></div>
                 <div>${icon}</div>
             `;
             container.appendChild(div);
@@ -356,7 +430,7 @@
         document.getElementById('user-count').innerText = count;
     }
 
-    function changeNickname() { // REQ 3
+    function changeNickname() {
         const newNick = prompt("Nhập biệt danh mới:");
         if(newNick && newNick.trim() !== "") {
             db.ref('users/' + myID).update({ nickname: newNick.trim() });
@@ -371,7 +445,8 @@
         sortedIDs.forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
-            if(!u.isOnline && uid !== myID) return;
+            // Chỉ hiện vé nếu User Active và Online (hoặc là chính mình)
+            if((!u.isOnline || u.active === false) && uid !== myID) return;
 
             const isMe = (uid === myID);
             const hasTicket = u.ticket && u.ticket.length === 16;
@@ -399,9 +474,14 @@
             
             let footer = '';
             if(isMe) {
-                if(!hasTicket) gridHTML += `<div class="create-overlay"><button class="btn-create" onclick="createTicket()">TẠO VÉ</button></div>`;
-                else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer" style="display:flex; gap:5px"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
-                else footer = `<div class="t-footer" style="text-align:center; color:var(--green); font-weight:bold; font-size:11px">ĐÃ CHỐT</div>`;
+                // Nếu mình bị inactive thì chặn
+                if(u.active === false) {
+                    gridHTML += `<div class="create-overlay"><span>TÀI KHOẢN BỊ KHÓA</span></div>`;
+                } else {
+                    if(!hasTicket) gridHTML += `<div class="create-overlay"><button class="btn-create" onclick="createTicket()">TẠO VÉ</button></div>`;
+                    else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer" style="display:flex; gap:5px"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
+                    else footer = `<div class="t-footer" style="text-align:center; color:var(--green); font-weight:bold; font-size:11px">ĐÃ CHỐT</div>`;
+                }
             } else {
                 if(!hasTicket) footer = `<div class="t-footer" style="text-align:center; color:#aaa; font-size:11px">Chưa có vé</div>`;
                 else if(!u.isReady) footer = `<div class="t-footer" style="text-align:center; color:orange; font-size:11px">Đang chọn...</div>`;
@@ -467,7 +547,7 @@
         }
     }
 
-    // --- 6. USER MANAGER (REQ 4) ---
+    // --- 6. USER MANAGER (REQ 4 UPDATED: Toggle Active) ---
     function openUserManager() {
         document.getElementById('user-manager-modal').style.display = 'flex';
         renderManagerTable();
@@ -480,7 +560,17 @@
             const u = usersData[uid];
             if(u.role === 'admin') return;
             const tr = document.createElement('tr');
+            
+            // Toggle Switch
+            const isChecked = (u.active !== false) ? 'checked' : '';
+            
             tr.innerHTML = `
+                <td style="text-align:center;">
+                    <label class="switch">
+                        <input type="checkbox" ${isChecked} onchange="toggleUserActive('${uid}', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </td>
                 <td>${uid}</td>
                 <td>${u.nickname || uid}</td>
                 <td>${u.pass}</td>
@@ -488,6 +578,10 @@
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    function toggleUserActive(uid, status) {
+        db.ref('users/' + uid).update({ active: status });
     }
 
     function resetPass(uid) {
@@ -503,7 +597,13 @@
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
             if(u.role !== 'admin') {
-                data.push({ "Username": uid, "Biệt Danh": u.nickname || uid, "Mật Khẩu": u.pass });
+                // Thêm trạng thái Active vào Excel
+                data.push({ 
+                    "Username": uid, 
+                    "Biệt Danh": u.nickname || uid, 
+                    "Mật Khẩu": u.pass,
+                    "Trạng Thái": (u.active !== false ? "Active" : "Inactive")
+                });
             }
         });
         const ws = XLSX.utils.json_to_sheet(data);
