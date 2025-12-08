@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang - Final V9</title>
+    <title>Đệ Nhất Bang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -17,19 +17,19 @@
             --red: #D32F2F;     
             --bg: #ECEFF1;      
             --sidebar-bg: #102027; 
-            --orange-border: #FF6D00; /* Màu cam cho vé user */
+            --orange-border: #FF6D00; 
         }
         
         body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #546E7A; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #546E7A; border-radius: 2px; }
 
-        /* --- STYLE KIẾM HIỆP --- */
+        /* --- FONT KIẾM HIỆP --- */
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@900&display=swap');
 
         .sword-title {
             font-family: 'Merriweather', serif;
-            font-size: 32px;
+            font-size: 28px; /* Giảm xíu cho gọn */
             font-weight: 900;
             color: var(--red);
             text-transform: uppercase;
@@ -37,150 +37,229 @@
             margin: 0;
             padding-bottom: 10px;
             text-shadow: 2px 2px 0px #FFD54F, -1px -1px 0 #000;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             border-bottom: 2px solid #546E7A;
         }
 
-        /* REQ 1: GOM CHỮ VÀO GIỮA */
+        /* --- CẤU TRÚC 3 CỘT (REQ 2) --- */
+        .app-layout { display: flex; width: 100%; height: 100%; }
+
+        /* CỘT TRÁI: ADMIN & MENU */
+        .sidebar-left { 
+            width: 320px; 
+            background: var(--sidebar-bg); 
+            color: #ECEFF1; 
+            display: flex; 
+            flex-direction: column; 
+            border-right: 4px solid var(--accent); 
+            z-index: 100; 
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5); 
+        }
+
+        /* CỘT GIỮA: VÉ */
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background: #f5f5f5; 
+            overflow: hidden;
+        }
+
+        /* CỘT PHẢI: USER LIST (REQ 2) */
+        .sidebar-right {
+            width: 220px; /* Nhỏ gọn */
+            background: #192b33;
+            border-left: 2px solid #37474F;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            z-index: 90;
+        }
+
+        /* --- CÂU ĐỐI & BÓNG (REQ 4) --- */
+        .brand-area { padding: 15px 0; background: rgba(0,0,0,0.2); }
+        
         .couplet-container {
             display: flex;
-            justify-content: center; /* Canh giữa */
+            justify-content: center;
             align-items: center;
             padding: 15px 0;
-            background: rgba(0,0,0,0.2);
-            gap: 15px; /* Khoảng cách giữa chữ và bóng */
+            gap: 25px; /* REQ 4: Dời ra xa bóng hơn */
         }
 
         .couplet-text {
             font-family: 'Merriweather', serif;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #CFD8DC;
-            width: 25px; /* Thu hẹp chiều rộng cột chữ */
-            text-align: center;
-            line-height: 1.4;
+            width: 30px; 
+            line-height: 1.5;
             text-shadow: 1px 1px 2px black;
         }
         
-        .couplet-text span { display: block; margin-bottom: 2px; }
+        /* REQ 4: Căn lề câu đối */
+        .couplet-left { text-align: right; } /* Hướng vào bóng */
+        .couplet-right { text-align: left; } /* Hướng vào bóng */
+        
+        .couplet-text span { display: block; margin-bottom: 3px; }
 
         .current-ball {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             background: white;
             border-radius: 50%;
-            border: 5px solid var(--red);
+            border: 6px solid var(--red);
             color: var(--red);
-            font-size: 40px;
+            font-size: 45px;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 20px rgba(255, 213, 79, 0.6);
+            box-shadow: 0 0 25px rgba(255, 213, 79, 0.5);
             flex-shrink: 0;
         }
 
-        /* --- LOGIN & MODALS --- */
-        #login-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-top: 5px solid var(--accent); }
-        .inp-std { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #CFD8DC; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;}
-        .btn-full { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
-        .btn-login { background: var(--primary); color: white; }
-        .btn-reg { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        /* --- MENU NÚT BẤM (REQ 1 & 3) --- */
+        .action-menu {
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1; /* Đẩy footer xuống */
+        }
 
-        /* Manager Modal */
-        #user-manager-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
-        .manager-box { background: white; width: 700px; max-height: 80vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-        .mgr-header { padding: 15px; background: var(--primary); color: white; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .mgr-body { padding: 15px; overflow-y: auto; flex: 1; }
-        .mgr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .mgr-table th, .mgr-table td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
-        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--green); }
-        input:checked + .slider:before { transform: translateX(20px); }
-        .btn-reset { padding: 4px 8px; background: orange; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .btn-menu {
+            background: #37474F;
+            color: #CFD8DC;
+            border: 1px solid #546E7A;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-menu:hover { background: #455A64; color: white; border-color: var(--accent); }
+        .btn-menu i { width: 20px; text-align: center; color: var(--accent); }
 
-        /* --- LAYOUT --- */
-        .app-layout { display: flex; width: 100%; height: 100%; }
-        .sidebar { width: 360px; background: var(--sidebar-bg); color: #ECEFF1; display: flex; flex-direction: column; border-right: 4px solid var(--accent); z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        /* REQ 3: Nút Quay nằm dưới bóng */
+        .spin-area { text-align: center; margin-top: 10px; padding: 0 20px 10px 20px; border-bottom: 1px solid #37474F; }
+        .btn-spin {
+            width: 100%;
+            background: linear-gradient(45deg, #FF6F00, #FFCA28);
+            border: none;
+            color: #3e2723;
+            font-weight: 900;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
+            animation: pulse 2s infinite;
+        }
+        .btn-spin:disabled { background: #555; color: #aaa; animation: none; box-shadow: none; cursor: not-allowed; }
+
+        /* --- USER LIST BÊN PHẢI (REQ 2 - Nhỏ gọn) --- */
+        .right-header {
+            padding: 10px;
+            background: #102027;
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid #37474F;
+            text-align: center;
+        }
+        .user-list-container { flex: 1; overflow-y: auto; padding: 5px; }
+        .u-item-compact {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            margin-bottom: 2px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
+            font-size: 12px; /* Chữ nhỏ */
+        }
+        .u-item-compact:hover { border-color: #546E7A; background: rgba(255,255,255,0.05); }
+        .u-avatar-sm { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #78909C; margin-right: 8px; }
+        .u-name-sm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #CFD8DC; }
         
-        .history-section { border-top: 1px solid #37474F; padding: 10px; flex: 0 0 auto; max-height: 150px; display: flex; flex-direction: column; }
-        .hist-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; overflow-y: auto; padding-right: 5px; }
-        .hist-item { background: #263238; color: var(--accent); text-align: center; padding: 4px; border-radius: 3px; font-weight: bold; font-size: 13px; border: 1px solid #37474F; animation: popIn 0.2s; }
-
-        .user-panel { flex: 1; display: flex; flex-direction: column; border-top: 1px solid #37474F; min-height: 0; }
-        .panel-header { padding: 8px 15px; font-size: 11px; font-weight: bold; color: #B0BEC5; background: #0c181d; display: flex; justify-content: space-between; }
-        .user-list { flex: 1; overflow-y: auto; padding: 5px; }
-        .u-item { display: flex; align-items: center; padding: 6px; margin-bottom: 2px; background: rgba(255,255,255,0.03); border-radius: 4px; }
-        .u-avatar { width: 28px; height: 28px; border-radius: 50%; margin-right: 8px; border: 1px solid #546E7A; }
-        .u-name { font-size: 13px; font-weight: 600; color: #E0E0E0; flex: 1; }
-        .btn-edit-nick { background: none; border: none; color: #78909C; cursor: pointer; font-size: 10px; margin-left: 5px; }
-
-        .log-panel { height: 120px; background: #000; border-top: 2px solid var(--accent); display: flex; flex-direction: column; font-size: 11px; font-family: monospace; }
-        .log-list { padding: 8px; overflow-y: auto; color: #B0BEC5; }
-        .admin-controls { padding: 10px; background: #263238; border-top: 1px solid #455A64; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .btn-adm { padding: 8px; border: none; border-radius: 4px; font-weight: bold; color: white; cursor: pointer; font-size: 11px; }
-
-        .main-content { flex: 1; display: flex; flex-direction: column; background: #f5f5f5; }
-        .stage-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 15px; }
-
-        /* --- TICKET STYLES --- */
+        /* --- VÉ NHỎ GỌN (REQ 2) --- */
+        .stage-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 10px; justify-content: center; }
+        
         .ticket { 
-            width: 200px; 
+            width: 160px; /* Nhỏ hơn (cũ 200) */
             background: white; 
-            border-radius: 8px; 
+            border-radius: 6px; 
             overflow: hidden; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            border-top: 5px solid #B0BEC5; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            border-top: 4px solid #B0BEC5; 
             position: relative; 
             height: fit-content; 
             transition: 0.3s; 
         }
 
-        /* REQ 3: VÉ CỦA USER MÀU CAM */
         .ticket.is-me { 
-            border: 3px solid var(--orange-border) !important; /* Viền cam toàn bộ */
-            transform: translateY(-5px); 
-            box-shadow: 0 8px 25px rgba(255, 109, 0, 0.3); /* Bóng đổ cam */
+            border: 2px solid var(--orange-border) !important; 
+            box-shadow: 0 5px 15px rgba(255, 109, 0, 0.25); 
+            transform: scale(1.02);
             z-index: 10; 
         }
-
         .ticket.winner { border-color: var(--red) !important; background: #FFEBEE; animation: pulseRed 1s infinite; transform: scale(1.05); z-index: 20; }
-        
-        .t-header { padding: 8px; background: #ECEFF1; font-size: 13px; font-weight: bold; color: #37474F; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
-        
-        .t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #CFD8DC; padding: 2px; }
-        
-        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: #455A64; position: relative; }
+
+        .t-header { padding: 5px 8px; background: #ECEFF1; font-size: 11px; font-weight: bold; color: #37474F; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
+        .t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #CFD8DC; padding: 1px; }
+        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 14px; /* Số nhỏ hơn */ font-weight: bold; color: #455A64; }
         .t-cell.hit { background: var(--red); color: white; }
-        .t-cell.empty { background: #ECEFF1; }
+        .t-cell.waiting { animation: cellBlink 1s infinite; border: 1px solid var(--orange-border); color: var(--orange-border); z-index: 1;}
 
-        /* REQ 4: HIỆU ỨNG NHẤP NHÁY CHO Ô CHỜ */
-        @keyframes cellBlink {
-            0% { background: #FFF3E0; color: #E65100; transform: scale(1); }
-            50% { background: #FFCC80; color: #E65100; transform: scale(1.1); box-shadow: 0 0 5px orange; z-index: 2; }
-            100% { background: #FFF3E0; color: #E65100; transform: scale(1); }
-        }
-        .t-cell.waiting {
-            animation: cellBlink 1s infinite;
-            border: 1px solid var(--orange-border);
-            color: var(--orange-border);
-        }
+        .t-footer { padding: 4px; background: white; display: flex; gap: 2px;}
+        .btn-act { flex: 1; padding: 4px; border: none; border-radius: 2px; color: white; font-weight: bold; cursor: pointer; font-size: 10px; }
+        .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; z-index: 5; }
+        .btn-create { background: var(--primary); color: white; padding: 6px 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; animation: float 2s infinite; font-size: 11px; }
 
-        .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.85); display: flex; justify-content: center; align-items: center; z-index: 5; }
-        .btn-create { background: var(--primary); color: white; padding: 8px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; animation: float 2s infinite; font-size: 12px; }
-        .t-footer { padding: 5px; background: white; }
-        .btn-act { width: 48%; padding: 5px; border: none; border-radius: 3px; color: white; font-weight: bold; cursor: pointer; font-size: 11px; }
-
-        #win-popup { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000; flex-direction: column; align-items: center; justify-content: center; }
+        /* --- MODALS (History & Log) --- */
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
+        .modal-box { background: #263238; color: white; padding: 20px; border-radius: 10px; width: 500px; max-width: 90%; border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #546E7A; padding-bottom: 10px; margin-bottom: 15px; }
+        .modal-title { font-weight: bold; color: var(--accent); font-size: 18px; }
+        .close-btn { background: none; border: none; color: #90A4AE; font-size: 24px; cursor: pointer; }
+        .close-btn:hover { color: white; }
         
+        /* Grid History Modal */
+        .modal-hist-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+        .modal-ball { background: white; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin: auto; }
+        
+        /* Log List Modal */
+        .modal-log-list { max-height: 300px; overflow-y: auto; }
+        .modal-log-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #37474F; font-size: 13px; }
+        .modal-log-row:last-child { border: none; }
+
+        /* --- LOGIN & WIN POPUP --- */
+        #login-modal, #win-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; border-top: 5px solid var(--accent); }
+        .inp-std { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #CFD8DC; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;}
+        .btn-full { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-login { background: var(--primary); color: white; }
+        .btn-reg { background: white; border: 2px solid var(--primary); color: var(--primary); }
+
+        /* Animations */
         .hidden { display: none !important; }
-        @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes cellBlink { 0% { background: #FFF3E0; color: #E65100; transform: scale(1); } 50% { background: #FFCC80; color: #E65100; transform: scale(1.1); box-shadow: 0 0 5px orange; z-index: 2; } 100% { background: #FFF3E0; color: #E65100; transform: scale(1); } }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
         @keyframes pulseRed { 0%{box-shadow:0 0 0 0 rgba(211,47,47,0.7)} 70%{box-shadow:0 0 0 15px rgba(211,47,47,0)} 100%{box-shadow:0 0 0 0 rgba(211,47,47,0)} }
+
+        /* Switch styles (for Admin) */
+        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--green); }
+        input:checked + .slider:before { transform: translateX(16px); }
     </style>
 </head>
 <body>
@@ -196,16 +275,36 @@
     const db = firebase.database();
 </script>
 
-<div id="user-manager-modal">
-    <div class="manager-box">
-        <div class="mgr-header">
-            <span>QUẢN LÝ USER</span>
-            <button onclick="document.getElementById('user-manager-modal').style.display='none'" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">&times;</button>
+<div id="history-modal" class="modal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="modal-title">SỐ ĐÃ XỔ</span>
+            <button class="close-btn" onclick="document.getElementById('history-modal').style.display='none'">&times;</button>
         </div>
-        <div class="mgr-body">
-            <button onclick="exportExcel()" style="padding:10px; background:#2E7D32; color:white; border:none; border-radius:4px; margin-bottom:10px; cursor:pointer;"><i class="fas fa-file-excel"></i> Xuất Excel</button>
-            <table class="mgr-table">
-                <thead><tr><th style="width:50px">Active</th><th>Username</th><th>Biệt Danh</th><th>Pass</th><th>Action</th></tr></thead>
+        <div class="modal-hist-grid" id="modal-hist-content"></div>
+    </div>
+</div>
+
+<div id="log-modal" class="modal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span class="modal-title">BẢNG VÀNG</span>
+            <button class="close-btn" onclick="document.getElementById('log-modal').style.display='none'">&times;</button>
+        </div>
+        <div class="modal-log-list" id="modal-log-content"></div>
+    </div>
+</div>
+
+<div id="user-manager-modal" class="modal">
+    <div class="modal-box" style="width: 700px; background: white; color: black; border:none;">
+        <div class="modal-head" style="border-bottom-color: #eee;">
+            <span class="modal-title" style="color:var(--primary)">QUẢN LÝ USER</span>
+            <button class="close-btn" style="color:#555" onclick="document.getElementById('user-manager-modal').style.display='none'">&times;</button>
+        </div>
+        <div style="overflow-y:auto; max-height:60vh">
+            <button onclick="exportExcel()" style="padding:8px; background:#2E7D32; color:white; border:none; border-radius:4px; margin-bottom:10px; cursor:pointer;">Xuất Excel</button>
+            <table style="width:100%; border-collapse:collapse; font-size:13px">
+                <thead><tr style="background:#f2f2f2"><th style="padding:8px">Active</th><th style="padding:8px">ID</th><th style="padding:8px">Nick</th><th style="padding:8px">Pass</th><th style="padding:8px">Action</th></tr></thead>
                 <tbody id="mgr-table-body"></tbody>
             </table>
         </div>
@@ -215,10 +314,10 @@
 <div id="login-modal">
     <div class="login-box">
         <h2 style="color: var(--primary); margin-top:0;">ĐỆ NHẤT GAME</h2>
-        <input type="text" id="inp-user" class="inp-std" placeholder="Tên đăng nhập (Viết liền)">
+        <input type="text" id="inp-user" class="inp-std" placeholder="Tên đăng nhập">
         <input type="password" id="inp-pass" class="inp-std" placeholder="Mật khẩu">
         <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
-        <button class="btn-full btn-reg" onclick="handleRegister()">ĐĂNG KÝ MỚI</button>
+        <button class="btn-full btn-reg" onclick="handleRegister()">ĐĂNG KÝ</button>
     </div>
 </div>
 
@@ -229,50 +328,58 @@
 </div>
 
 <div class="app-layout">
-    <div class="sidebar">
-        <div class="brand-area" style="padding-top: 20px;">
+    
+    <div class="sidebar-left">
+        <div class="brand-area">
             <div class="sword-title">ĐỆ NHẤT BANG</div>
+            
             <div class="couplet-container">
-                <div class="couplet-text">
+                <div class="couplet-text couplet-left">
                     <span>PHONG</span><span>ĐỘ</span><span>LÀ</span><span>NHẤT</span><span>THỜI</span>
                 </div>
                 <div class="current-ball" id="ball-display">--</div>
-                <div class="couplet-text">
+                <div class="couplet-text couplet-right">
                     <span>ĐẲNG</span><span>CẤP</span><span>LÀ</span><span>MÃI</span><span>MÃI</span>
                 </div>
             </div>
+            
             <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:5px; text-align:center">ĐANG CHỜ</div>
-        </div>
-
-        <div class="history-section">
-            <div class="hist-title">Số đã xổ</div>
-            <div class="hist-grid" id="history-grid"></div>
-        </div>
-
-        <div class="user-panel">
-            <div class="panel-header">
-                <span>ONLINE</span> <span id="user-count">0</span>
+            
+            <div id="spin-wrapper" class="spin-area hidden">
+                <button id="btn-spin" class="btn-spin" onclick="adminDraw()">QUAY SỐ</button>
             </div>
-            <div class="user-list" id="user-list-container"></div>
         </div>
 
-        <div class="log-panel">
-            <div class="panel-header" style="background:#000; color:var(--accent)">LỊCH SỬ THẮNG</div>
-            <div class="log-list" id="log-list-container"></div>
+        <div class="action-menu">
+            <button class="btn-menu" onclick="document.getElementById('history-modal').style.display='flex'">
+                <i class="fas fa-th"></i> XEM SỐ ĐÃ XỔ
+            </button>
+            <button class="btn-menu" onclick="document.getElementById('log-modal').style.display='flex'">
+                <i class="fas fa-trophy"></i> XEM BẢNG VÀNG
+            </button>
+            
+            <div id="admin-actions" class="hidden" style="margin-top:10px; border-top:1px solid #546E7A; padding-top:10px">
+                <button class="btn-menu" onclick="adminReset()" style="color:#ef5350"><i class="fas fa-sync"></i> RESET BÀN</button>
+                <button class="btn-menu" onclick="openUserManager()" style="color:#42A5F5"><i class="fas fa-users-cog"></i> QUẢN LÝ USER</button>
+            </div>
         </div>
 
-        <div id="admin-panel" class="admin-controls hidden">
-            <button class="btn-adm" style="background:var(--accent); color:black" onclick="adminDraw()">QUAY SỐ</button>
-            <button class="btn-adm" style="background:var(--red)" onclick="adminReset()">RESET BÀN</button>
-            <button class="btn-adm" style="background:#1976D2; grid-column: span 2" onclick="openUserManager()">QUẢN LÝ USER</button>
-        </div>
-        <div style="padding:5px; background:#0c181d">
-            <button class="btn-adm" style="width:100%; background:#37474F" onclick="doLogout()">ĐĂNG XUẤT</button>
+        <div style="padding:15px; margin-top:auto">
+            <button class="btn-menu" onclick="doLogout()" style="width:100%; justify-content:center; background:#263238">
+                <i class="fas fa-sign-out-alt"></i> ĐĂNG XUẤT
+            </button>
         </div>
     </div>
 
     <div class="main-content">
         <div class="stage-area" id="stage-area"></div>
+    </div>
+
+    <div class="sidebar-right">
+        <div class="right-header">
+            DANH SÁCH ONLINE (<span id="user-count">0</span>)
+        </div>
+        <div class="user-list-container" id="user-list-el"></div>
     </div>
 </div>
 
@@ -284,36 +391,26 @@
     let usersData = {};
     let isDrawing = false;
 
+    // --- AUTH ---
     function handleLogin() {
         const u = document.getElementById('inp-user').value.trim().toLowerCase();
         const p = document.getElementById('inp-pass').value;
-        if(!u || !p) return alert("Nhập đủ thông tin!");
-
+        if(!u || !p) return alert("Thiếu thông tin!");
         db.ref('users/' + u).once('value', snap => {
             const val = snap.val();
-            if(snap.exists() && val.pass == p) {
-                loginSuccess(u, val);
-            } else { alert("Sai thông tin!"); }
+            if(snap.exists() && val.pass == p) loginSuccess(u, val);
+            else alert("Sai thông tin!");
         });
     }
 
     function handleRegister() {
         const u = document.getElementById('inp-user').value.trim().toLowerCase();
         const p = document.getElementById('inp-pass').value;
-        if(!u || !p) return alert("Nhập đủ thông tin!");
-        if(/[^a-z0-9]/.test(u)) return alert("Username chỉ gồm chữ thường và số!");
-
+        if(!u || !p) return alert("Thiếu thông tin!");
+        if(/[^a-z0-9]/.test(u)) return alert("User chỉ gồm chữ thường số!");
         db.ref('users/' + u).once('value', snap => {
-            if(snap.exists()) return alert("Username đã tồn tại!");
-            const newUser = {
-                pass: p,
-                nickname: u,
-                role: (u === ADMIN_USER) ? 'admin' : 'player',
-                active: true,
-                isOnline: true,
-                ticket: null,
-                isReady: false
-            };
+            if(snap.exists()) return alert("User đã tồn tại!");
+            const newUser = { pass: p, nickname: u, role: (u === ADMIN_USER)?'admin':'player', active: true, isOnline: true, ticket: null, isReady: false };
             db.ref('users/' + u).set(newUser).then(() => loginSuccess(u, newUser));
         });
     }
@@ -323,14 +420,16 @@
         myRole = data.role;
         sessionStorage.setItem('loto_id', myID);
         document.getElementById('login-modal').classList.add('hidden');
-
         if(!data.nickname) db.ref('users/' + uid).update({ nickname: uid });
         if(data.active === undefined) db.ref('users/' + uid).update({ active: true });
-
+        
         db.ref('users/' + myID).update({ isOnline: true });
         db.ref('users/' + myID + '/isOnline').onDisconnect().set(false);
 
-        if(myRole === 'admin') document.getElementById('admin-panel').classList.remove('hidden');
+        if(myRole === 'admin') {
+            document.getElementById('spin-wrapper').classList.remove('hidden');
+            document.getElementById('admin-actions').classList.remove('hidden');
+        }
         initGameListeners();
     }
 
@@ -339,20 +438,19 @@
         sessionStorage.clear();
         location.reload();
     }
-
-    const savedID = sessionStorage.getItem('loto_id');
-    if(savedID) {
-        db.ref('users/' + savedID).once('value', snap => {
-            if(snap.exists()) loginSuccess(savedID, snap.val());
-        });
+    
+    if(sessionStorage.getItem('loto_id')) {
+        db.ref('users/' + sessionStorage.getItem('loto_id')).once('value', s => { if(s.exists()) loginSuccess(s.key, s.val()); });
     }
 
+    // --- GAME LOGIC ---
     function initGameListeners() {
         db.ref('gameState').on('value', snap => {
             gameState = snap.val() || { status: 'waiting', history: [], current: '--' };
             if(!gameState.history) gameState.history = [];
-            renderHeader();
-            renderTickets();
+            renderHeader(); // Cập nhật số, trạng thái
+            renderHistoryModal(); // Cập nhật modal
+            renderTickets(); // Vẽ lại vé (để nhấp nháy, trúng...)
             
             if(gameState.status === 'ended' && gameState.winner) {
                 document.getElementById('win-popup').style.display = 'flex';
@@ -366,16 +464,14 @@
             usersData = snap.val() || {};
             renderUserList();
             renderTickets();
-            if(document.getElementById('user-manager-modal').style.display !== 'none') {
-                renderManagerTable();
-            }
+            if(document.getElementById('user-manager-modal').style.display !== 'none') renderManagerTable();
         });
 
-        db.ref('winLogs').limitToLast(10).on('value', snap => {
+        db.ref('winLogs').limitToLast(20).on('value', snap => {
             const logs = [];
             snap.forEach(c => logs.push(c.val()));
-            document.getElementById('log-list-container').innerHTML = logs.reverse().map(l => 
-                `<div class="log-row"><span>${l.time}</span> <span class="win">${l.winner}</span></div>`
+            document.getElementById('modal-log-content').innerHTML = logs.reverse().map(l => 
+                `<div class="modal-log-row"><span style="color:#FFD54F">${l.time}</span> <span style="font-weight:bold">${l.winner}</span></div>`
             ).join('');
         });
     }
@@ -383,48 +479,52 @@
     function renderHeader() {
         document.getElementById('ball-display').innerText = (gameState.current < 10 && gameState.current !== '--') ? '0'+gameState.current : gameState.current;
         document.getElementById('status-text').innerText = (gameState.status === 'playing') ? "ĐANG QUAY..." : "ĐANG CHỜ";
+        
+        const btnSpin = document.getElementById('btn-spin');
+        if(gameState.status === 'ended') btnSpin.disabled = true;
+        else btnSpin.disabled = false;
+    }
 
-        const histContainer = document.getElementById('history-grid');
-        histContainer.innerHTML = gameState.history.map(n => 
-            `<div class="hist-item">${n < 10 ? '0'+n : n}</div>`
+    function renderHistoryModal() {
+        // Render vào Modal thay vì Sidebar
+        document.getElementById('modal-hist-content').innerHTML = gameState.history.map(n => 
+            `<div class="modal-ball">${n}</div>`
         ).join('');
-        histContainer.scrollTop = histContainer.scrollHeight;
     }
 
     function renderUserList() {
-        const container = document.getElementById('user-list-container');
+        const container = document.getElementById('user-list-el');
         container.innerHTML = '';
         let count = 0;
-
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
+            // Chỉ hiện Online hoặc Inactive(nhưng vẫn online)
             if(!u.isOnline && uid !== myID) return;
-
+            
             count++;
             const div = document.createElement('div');
-            div.className = 'u-item';
+            div.className = 'u-item-compact';
             
-            let icon = !u.ticket ? '<i class="fas fa-plus" style="color:#777"></i>' : (!u.isReady ? '<i class="fas fa-edit" style="color:orange"></i>' : '<i class="fas fa-check" style="color:var(--green)"></i>');
-            const displayName = u.nickname || uid;
-            let editBtn = (uid === myID) ? `<button class="btn-edit-nick" onclick="changeNickname()"><i class="fas fa-pen"></i></button>` : '';
-            let nameStyle = u.active === false ? 'color: #ef5350; text-decoration: line-through;' : '';
+            const name = u.nickname || uid;
+            const style = u.active===false ? 'text-decoration:line-through; color:#ef5350' : '';
+            const status = !u.ticket ? '<i class="fas fa-plus" style="color:#555"></i>' : (!u.isReady ? '<i class="fas fa-pen" style="color:orange"></i>' : '<i class="fas fa-check" style="color:var(--green)"></i>');
+            
+            let editBtn = (uid===myID) ? `<i class="fas fa-edit" style="cursor:pointer; margin-left:5px" onclick="changeNick()"></i>` : '';
 
             div.innerHTML = `
-                <img src="https://ui-avatars.com/api/?name=${displayName}&background=random&color=fff&size=28" class="u-avatar">
-                <div class="u-info"><div class="u-name" style="${nameStyle}">${displayName} ${editBtn}</div></div>
-                <div>${icon}</div>
+                <img src="https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=24" class="u-avatar-sm">
+                <div class="u-name-sm" style="${style}">${name} ${editBtn}</div>
+                <div style="font-size:10px">${status}</div>
             `;
             container.appendChild(div);
         });
         document.getElementById('user-count').innerText = count;
     }
 
-    function changeNickname() {
-        const newNick = prompt("Nhập biệt danh mới:");
-        if(newNick && newNick.trim() !== "") {
-            db.ref('users/' + myID).update({ nickname: newNick.trim() });
-        }
+    function changeNick(){
+        let n = prompt("Biệt danh mới:");
+        if(n) db.ref('users/'+myID).update({nickname:n.trim()});
     }
 
     function renderTickets() {
@@ -441,8 +541,6 @@
             const hasTicket = u.ticket && u.ticket.length === 16;
             let isWinner = false;
             let gridHTML = `<div class="t-grid">`;
-            
-            // REQ 4: Logic Tìm ô Chờ (Waiting)
             let waitingIndices = [];
 
             if(!hasTicket) {
@@ -454,29 +552,23 @@
                     [0,4,8,12], [1,5,9,13], [2,6,10,14], [3,7,11,15], 
                     [0,5,10,15], [3,6,9,12]
                 ];
-                
-                // Check win
                 isWinner = patterns.some(pat => pat.every(idx => hits[idx]));
-
-                // Check waiting (Nếu đã trúng 3/4)
+                
+                // Logic Waiting (REQ 4)
                 if(!isWinner && gameState.status === 'playing') {
                     patterns.forEach(pat => {
-                        const hitCount = pat.filter(idx => hits[idx]).length;
-                        if(hitCount === 3) {
-                            // Tìm ô chưa trúng
-                            const missingIdx = pat.find(idx => !hits[idx]);
-                            if(missingIdx !== undefined && !waitingIndices.includes(missingIdx)) {
-                                waitingIndices.push(missingIdx);
-                            }
+                        if(pat.filter(i=>hits[i]).length === 3) {
+                            const missing = pat.find(i=>!hits[i]);
+                            if(missing!==undefined) waitingIndices.push(missing);
                         }
                     });
                 }
 
                 u.ticket.forEach((n, i) => {
-                    let classes = "t-cell";
-                    if(hits[i]) classes += " hit";
-                    else if(waitingIndices.includes(i)) classes += " waiting"; // Thêm class nhấp nháy
-                    gridHTML += `<div class="${classes}">${n}</div>`;
+                    let cls = "t-cell";
+                    if(hits[i]) cls += " hit";
+                    else if(waitingIndices.includes(i)) cls += " waiting";
+                    gridHTML += `<div class="${cls}">${n}</div>`;
                 });
             }
             gridHTML += `</div>`;
@@ -484,21 +576,19 @@
             if(isWinner && gameState.status === 'playing' && (isMe || myRole==='admin')) handleWin(u.nickname || uid);
 
             const card = document.createElement('div');
-            // Class 'is-me' có viền cam (trong CSS)
             card.className = `ticket ${isMe?'is-me':''} ${isWinner?'winner':''}`;
             
             let footer = '';
             if(isMe) {
-                if(u.active === false) {
-                    gridHTML += `<div class="create-overlay"><span>BỊ KHÓA</span></div>`;
-                } else {
+                if(u.active === false) gridHTML += `<div class="create-overlay"><span>LOCKED</span></div>`;
+                else {
                     if(!hasTicket) gridHTML += `<div class="create-overlay"><button class="btn-create" onclick="createTicket()">TẠO VÉ</button></div>`;
-                    else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer" style="display:flex; gap:5px"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
-                    else footer = `<div class="t-footer" style="text-align:center; color:var(--green); font-weight:bold; font-size:11px">ĐÃ CHỐT</div>`;
+                    else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
+                    else footer = `<div class="t-footer" style="justify-content:center; color:var(--green); font-size:10px; font-weight:bold">ĐÃ CHỐT</div>`;
                 }
             } else {
-                if(!hasTicket) footer = `<div class="t-footer" style="text-align:center; color:#aaa; font-size:11px">Chưa có vé</div>`;
-                else if(!u.isReady) footer = `<div class="t-footer" style="text-align:center; color:orange; font-size:11px">Đang chọn...</div>`;
+                if(!hasTicket) footer = `<div class="t-footer" style="justify-content:center; color:#aaa; font-size:10px">...</div>`;
+                else if(!u.isReady) footer = `<div class="t-footer" style="justify-content:center; color:orange; font-size:10px">Chọn số...</div>`;
             }
 
             card.innerHTML = `<div class="t-header"><span>${u.nickname||uid}</span>${isWinner?'<span style="color:var(--red)">WIN!</span>':''}</div>${gridHTML}${footer}`;
@@ -532,29 +622,24 @@
     }
     function pad(n){return n<10?'0'+n:n}
 
-    // --- REQ 2: DELAY 1S KHI QUAY ---
+    // --- REQ 2: DELAY 1S ---
     function adminDraw() {
         if(myRole !== 'admin') return;
         if(gameState.status === 'ended') return alert("Reset bàn trước!");
-        
-        // Bật cờ đang quay để chặn bấm liên tục
         if(isDrawing) return;
         isDrawing = true;
 
         if(gameState.status === 'waiting') db.ref('gameState').update({ status: 'playing' });
         
-        // Chỉ hiện visual trạng thái "Đang quay" nhưng chưa ra số ngay
-        // Nút bấm có thể disable visual tạm thời
-        
+        // Visual effect: Quay số ảo (nếu muốn) hoặc chỉ cần delay
+        // Ở đây làm đơn giản delay 1s
         setTimeout(() => {
             let r;
             do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
             const nh = [...gameState.history, r];
-            
             db.ref('gameState').update({ current: r, history: nh });
-            
             isDrawing = false;
-        }, 1000); // Delay 1000ms (1 giây)
+        }, 1000); 
     }
 
     function adminReset() {
@@ -575,7 +660,6 @@
         document.getElementById('user-manager-modal').style.display = 'flex';
         renderManagerTable();
     }
-
     function renderManagerTable() {
         const tbody = document.getElementById('mgr-table-body');
         tbody.innerHTML = '';
@@ -583,53 +667,29 @@
             const u = usersData[uid];
             if(u.role === 'admin') return;
             const tr = document.createElement('tr');
-            
             const isChecked = (u.active !== false) ? 'checked' : '';
-            
             tr.innerHTML = `
-                <td style="text-align:center;">
-                    <label class="switch">
-                        <input type="checkbox" ${isChecked} onchange="toggleUserActive('${uid}', this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </td>
+                <td style="text-align:center;"><label class="switch"><input type="checkbox" ${isChecked} onchange="toggleActive('${uid}',this.checked)"><span class="slider"></span></label></td>
                 <td>${uid}</td>
-                <td>${u.nickname || uid}</td>
+                <td>${u.nickname||uid}</td>
                 <td>${u.pass}</td>
-                <td><button class="btn-reset" onclick="resetPass('${uid}')">Reset Pass</button></td>
+                <td><button class="btn-reset" onclick="resetPass('${uid}')">Reset</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
-
-    function toggleUserActive(uid, status) {
-        db.ref('users/' + uid).update({ active: status });
-    }
-
-    function resetPass(uid) {
-        if(confirm("Reset mật khẩu về 'denhatmaidinh'?")) {
-            db.ref('users/' + uid).update({ pass: 'denhatmaidinh' });
-            renderManagerTable();
-        }
-    }
-
+    function toggleActive(u, s) { db.ref('users/'+u).update({active:s}); }
+    function resetPass(u) { if(confirm("Reset pass?")) db.ref('users/'+u).update({pass:'denhatmaidinh'}); }
     function exportExcel() {
         const data = [];
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
-            if(u.role !== 'admin') {
-                data.push({ 
-                    "Username": uid, 
-                    "Biệt Danh": u.nickname || uid, 
-                    "Mật Khẩu": u.pass,
-                    "Active": (u.active !== false ? "Yes" : "No")
-                });
-            }
+            if(u.role !== 'admin') data.push({ User: uid, Nick: u.nickname, Pass: u.pass, Active: u.active });
         });
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Users");
-        XLSX.writeFile(wb, "DanhSachUser.xlsx");
+        XLSX.writeFile(wb, "Users.xlsx");
     }
 </script>
 </body>
