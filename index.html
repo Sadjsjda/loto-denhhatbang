@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang</title>
+    <title>Đệ Nhất Bang - Final V11</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -29,7 +29,7 @@
 
         .sword-title {
             font-family: 'Merriweather', serif;
-            font-size: 28px; /* Giảm xíu cho gọn */
+            font-size: 28px;
             font-weight: 900;
             color: var(--red);
             text-transform: uppercase;
@@ -41,10 +41,9 @@
             border-bottom: 2px solid #546E7A;
         }
 
-        /* --- CẤU TRÚC 3 CỘT (REQ 2) --- */
+        /* --- CẤU TRÚC 3 CỘT --- */
         .app-layout { display: flex; width: 100%; height: 100%; }
 
-        /* CỘT TRÁI: ADMIN & MENU */
         .sidebar-left { 
             width: 320px; 
             background: var(--sidebar-bg); 
@@ -56,7 +55,6 @@
             box-shadow: 5px 0 15px rgba(0,0,0,0.5); 
         }
 
-        /* CỘT GIỮA: VÉ */
         .main-content { 
             flex: 1; 
             display: flex; 
@@ -65,9 +63,8 @@
             overflow: hidden;
         }
 
-        /* CỘT PHẢI: USER LIST (REQ 2) */
         .sidebar-right {
-            width: 220px; /* Nhỏ gọn */
+            width: 220px;
             background: #192b33;
             border-left: 2px solid #37474F;
             display: flex;
@@ -76,7 +73,7 @@
             z-index: 90;
         }
 
-        /* --- CÂU ĐỐI & BÓNG (REQ 4) --- */
+        /* --- CÂU ĐỐI & BÓNG --- */
         .brand-area { padding: 15px 0; background: rgba(0,0,0,0.2); }
         
         .couplet-container {
@@ -84,7 +81,7 @@
             justify-content: center;
             align-items: center;
             padding: 15px 0;
-            gap: 25px; /* REQ 4: Dời ra xa bóng hơn */
+            gap: 25px;
         }
 
         .couplet-text {
@@ -97,10 +94,8 @@
             text-shadow: 1px 1px 2px black;
         }
         
-        /* REQ 4: Căn lề câu đối */
-        .couplet-left { text-align: right; } /* Hướng vào bóng */
-        .couplet-right { text-align: left; } /* Hướng vào bóng */
-        
+        .couplet-left { text-align: right; }
+        .couplet-right { text-align: left; }
         .couplet-text span { display: block; margin-bottom: 3px; }
 
         .current-ball {
@@ -119,13 +114,13 @@
             flex-shrink: 0;
         }
 
-        /* --- MENU NÚT BẤM (REQ 1 & 3) --- */
+        /* --- MENU NÚT BẤM --- */
         .action-menu {
             padding: 10px 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            flex: 1; /* Đẩy footer xuống */
+            flex: 1;
         }
 
         .btn-menu {
@@ -141,11 +136,11 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 100%;
         }
         .btn-menu:hover { background: #455A64; color: white; border-color: var(--accent); }
         .btn-menu i { width: 20px; text-align: center; color: var(--accent); }
 
-        /* REQ 3: Nút Quay nằm dưới bóng */
         .spin-area { text-align: center; margin-top: 10px; padding: 0 20px 10px 20px; border-bottom: 1px solid #37474F; }
         .btn-spin {
             width: 100%;
@@ -162,7 +157,7 @@
         }
         .btn-spin:disabled { background: #555; color: #aaa; animation: none; box-shadow: none; cursor: not-allowed; }
 
-        /* --- USER LIST BÊN PHẢI (REQ 2 - Nhỏ gọn) --- */
+        /* --- USER LIST BÊN PHẢI --- */
         .right-header {
             padding: 10px;
             background: #102027;
@@ -181,17 +176,17 @@
             border-radius: 4px;
             background: rgba(255,255,255,0.03);
             border: 1px solid transparent;
-            font-size: 12px; /* Chữ nhỏ */
+            font-size: 12px;
         }
         .u-item-compact:hover { border-color: #546E7A; background: rgba(255,255,255,0.05); }
         .u-avatar-sm { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #78909C; margin-right: 8px; }
         .u-name-sm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #CFD8DC; }
         
-        /* --- VÉ NHỎ GỌN (REQ 2) --- */
+        /* --- VÉ NHỎ GỌN --- */
         .stage-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 10px; justify-content: center; }
         
         .ticket { 
-            width: 160px; /* Nhỏ hơn (cũ 200) */
+            width: 160px; 
             background: white; 
             border-radius: 6px; 
             overflow: hidden; 
@@ -212,7 +207,7 @@
 
         .t-header { padding: 5px 8px; background: #ECEFF1; font-size: 11px; font-weight: bold; color: #37474F; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
         .t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #CFD8DC; padding: 1px; }
-        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 14px; /* Số nhỏ hơn */ font-weight: bold; color: #455A64; }
+        .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #455A64; }
         .t-cell.hit { background: var(--red); color: white; }
         .t-cell.waiting { animation: cellBlink 1s infinite; border: 1px solid var(--orange-border); color: var(--orange-border); z-index: 1;}
 
@@ -221,7 +216,7 @@
         .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; z-index: 5; }
         .btn-create { background: var(--primary); color: white; padding: 6px 15px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; animation: float 2s infinite; font-size: 11px; }
 
-        /* --- MODALS (History & Log) --- */
+        /* --- MODALS --- */
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; }
         .modal-box { background: #263238; color: white; padding: 20px; border-radius: 10px; width: 500px; max-width: 90%; border: 2px solid var(--accent); box-shadow: 0 0 30px rgba(0,0,0,0.8); }
         .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #546E7A; padding-bottom: 10px; margin-bottom: 15px; }
@@ -229,16 +224,13 @@
         .close-btn { background: none; border: none; color: #90A4AE; font-size: 24px; cursor: pointer; }
         .close-btn:hover { color: white; }
         
-        /* Grid History Modal */
         .modal-hist-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
         .modal-ball { background: white; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin: auto; }
         
-        /* Log List Modal */
         .modal-log-list { max-height: 300px; overflow-y: auto; }
         .modal-log-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #37474F; font-size: 13px; }
         .modal-log-row:last-child { border: none; }
 
-        /* --- LOGIN & WIN POPUP --- */
         #login-modal, #win-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; border-top: 5px solid var(--accent); }
         .inp-std { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #CFD8DC; border-radius: 6px; font-size: 14px; outline: none; box-sizing: border-box;}
@@ -246,14 +238,12 @@
         .btn-login { background: var(--primary); color: white; }
         .btn-reg { background: white; border: 2px solid var(--primary); color: var(--primary); }
 
-        /* Animations */
         .hidden { display: none !important; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         @keyframes cellBlink { 0% { background: #FFF3E0; color: #E65100; transform: scale(1); } 50% { background: #FFCC80; color: #E65100; transform: scale(1.1); box-shadow: 0 0 5px orange; z-index: 2; } 100% { background: #FFF3E0; color: #E65100; transform: scale(1); } }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
         @keyframes pulseRed { 0%{box-shadow:0 0 0 0 rgba(211,47,47,0.7)} 70%{box-shadow:0 0 0 15px rgba(211,47,47,0)} 100%{box-shadow:0 0 0 0 rgba(211,47,47,0)} }
 
-        /* Switch styles (for Admin) */
         .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
@@ -358,9 +348,13 @@
                 <i class="fas fa-trophy"></i> XEM BẢNG VÀNG
             </button>
             
-            <div id="admin-actions" class="hidden" style="margin-top:10px; border-top:1px solid #546E7A; padding-top:10px">
-                <button class="btn-menu" onclick="adminReset()" style="color:#ef5350"><i class="fas fa-sync"></i> RESET BÀN</button>
-                <button class="btn-menu" onclick="openUserManager()" style="color:#42A5F5"><i class="fas fa-users-cog"></i> QUẢN LÝ USER</button>
+            <div id="admin-actions" class="hidden" style="margin-top:10px; border-top:1px solid #546E7A; padding-top:10px; display: flex; gap: 5px;">
+                <button class="btn-menu" onclick="adminReset()" style="color:#ef5350; flex: 1; text-align: center; justify-content: center; padding: 10px 5px; font-size: 11px;">
+                    <i class="fas fa-sync" style="margin-right: 5px;"></i> VÁN MỚI
+                </button>
+                <button class="btn-menu" onclick="openUserManager()" style="color:#42A5F5; flex: 1; text-align: center; justify-content: center; padding: 10px 5px; font-size: 11px;">
+                    <i class="fas fa-users-cog" style="margin-right: 5px;"></i> QUẢN LÝ USER
+                </button>
             </div>
         </div>
 
@@ -448,9 +442,9 @@
         db.ref('gameState').on('value', snap => {
             gameState = snap.val() || { status: 'waiting', history: [], current: '--' };
             if(!gameState.history) gameState.history = [];
-            renderHeader(); // Cập nhật số, trạng thái
-            renderHistoryModal(); // Cập nhật modal
-            renderTickets(); // Vẽ lại vé (để nhấp nháy, trúng...)
+            renderHeader(); 
+            renderHistoryModal(); 
+            renderTickets(); 
             
             if(gameState.status === 'ended' && gameState.winner) {
                 document.getElementById('win-popup').style.display = 'flex';
@@ -486,7 +480,6 @@
     }
 
     function renderHistoryModal() {
-        // Render vào Modal thay vì Sidebar
         document.getElementById('modal-hist-content').innerHTML = gameState.history.map(n => 
             `<div class="modal-ball">${n}</div>`
         ).join('');
@@ -499,7 +492,6 @@
         Object.keys(usersData).forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
-            // Chỉ hiện Online hoặc Inactive(nhưng vẫn online)
             if(!u.isOnline && uid !== myID) return;
             
             count++;
@@ -554,7 +546,6 @@
                 ];
                 isWinner = patterns.some(pat => pat.every(idx => hits[idx]));
                 
-                // Logic Waiting (REQ 4)
                 if(!isWinner && gameState.status === 'playing') {
                     patterns.forEach(pat => {
                         if(pat.filter(i=>hits[i]).length === 3) {
@@ -622,7 +613,6 @@
     }
     function pad(n){return n<10?'0'+n:n}
 
-    // --- REQ 2: DELAY 1S ---
     function adminDraw() {
         if(myRole !== 'admin') return;
         if(gameState.status === 'ended') return alert("Reset bàn trước!");
@@ -631,8 +621,6 @@
 
         if(gameState.status === 'waiting') db.ref('gameState').update({ status: 'playing' });
         
-        // Visual effect: Quay số ảo (nếu muốn) hoặc chỉ cần delay
-        // Ở đây làm đơn giản delay 1s
         setTimeout(() => {
             let r;
             do { r = Math.floor(Math.random()*90)+1; } while(gameState.history.includes(r));
