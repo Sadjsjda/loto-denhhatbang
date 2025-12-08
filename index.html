@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đệ Nhất Bang - Final V11</title>
+    <title>Đệ Nhất Bang - Final V12</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -41,7 +41,7 @@
             border-bottom: 2px solid #546E7A;
         }
 
-        /* --- CẤU TRÚC 3 CỘT --- */
+        /* --- LAYOUT 3 CỘT --- */
         .app-layout { display: flex; width: 100%; height: 100%; }
 
         .sidebar-left { 
@@ -114,7 +114,7 @@
             flex-shrink: 0;
         }
 
-        /* --- MENU NÚT BẤM --- */
+        /* --- MENU --- */
         .action-menu {
             padding: 10px 20px;
             display: flex;
@@ -157,7 +157,7 @@
         }
         .btn-spin:disabled { background: #555; color: #aaa; animation: none; box-shadow: none; cursor: not-allowed; }
 
-        /* --- USER LIST BÊN PHẢI --- */
+        /* --- USER LIST BÊN PHẢI (UPDATED REQ 2) --- */
         .right-header {
             padding: 10px;
             background: #102027;
@@ -168,49 +168,37 @@
             text-align: center;
         }
         .user-list-container { flex: 1; overflow-y: auto; padding: 5px; }
+        
         .u-item-compact {
             display: flex;
             align-items: center;
-            padding: 5px;
+            padding: 6px;
             margin-bottom: 2px;
             border-radius: 4px;
             background: rgba(255,255,255,0.03);
             border: 1px solid transparent;
             font-size: 12px;
+            transition: 0.2s;
         }
-        .u-item-compact:hover { border-color: #546E7A; background: rgba(255,255,255,0.05); }
+        
+        /* Hiệu ứng trạng thái User */
+        .u-item-compact.is-online { background: rgba(46, 125, 50, 0.1); border-left: 2px solid var(--green); }
+        .u-item-compact.is-offline { opacity: 0.5; filter: grayscale(100%); }
+        .u-item-compact.is-inactive { opacity: 0.7; background: rgba(211, 47, 47, 0.1); border-left: 2px solid var(--red); }
+
         .u-avatar-sm { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #78909C; margin-right: 8px; }
         .u-name-sm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #CFD8DC; }
         
-        /* --- VÉ NHỎ GỌN --- */
+        /* --- VÉ SỐ --- */
         .stage-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 10px; justify-content: center; }
-        
-        .ticket { 
-            width: 160px; 
-            background: white; 
-            border-radius: 6px; 
-            overflow: hidden; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            border-top: 4px solid #B0BEC5; 
-            position: relative; 
-            height: fit-content; 
-            transition: 0.3s; 
-        }
-
-        .ticket.is-me { 
-            border: 2px solid var(--orange-border) !important; 
-            box-shadow: 0 5px 15px rgba(255, 109, 0, 0.25); 
-            transform: scale(1.02);
-            z-index: 10; 
-        }
+        .ticket { width: 160px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid #B0BEC5; position: relative; height: fit-content; transition: 0.3s; }
+        .ticket.is-me { border: 2px solid var(--orange-border) !important; box-shadow: 0 5px 15px rgba(255, 109, 0, 0.25); transform: scale(1.02); z-index: 10; }
         .ticket.winner { border-color: var(--red) !important; background: #FFEBEE; animation: pulseRed 1s infinite; transform: scale(1.05); z-index: 20; }
-
         .t-header { padding: 5px 8px; background: #ECEFF1; font-size: 11px; font-weight: bold; color: #37474F; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; }
         .t-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #CFD8DC; padding: 1px; }
         .t-cell { background: white; aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: #455A64; }
         .t-cell.hit { background: var(--red); color: white; }
         .t-cell.waiting { animation: cellBlink 1s infinite; border: 1px solid var(--orange-border); color: var(--orange-border); z-index: 1;}
-
         .t-footer { padding: 4px; background: white; display: flex; gap: 2px;}
         .btn-act { flex: 1; padding: 4px; border: none; border-radius: 2px; color: white; font-weight: bold; cursor: pointer; font-size: 10px; }
         .create-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; z-index: 5; }
@@ -226,10 +214,8 @@
         
         .modal-hist-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
         .modal-ball { background: white; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin: auto; }
-        
         .modal-log-list { max-height: 300px; overflow-y: auto; }
         .modal-log-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #37474F; font-size: 13px; }
-        .modal-log-row:last-child { border: none; }
 
         #login-modal, #win-popup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; border-top: 5px solid var(--accent); }
@@ -294,7 +280,7 @@
         <div style="overflow-y:auto; max-height:60vh">
             <button onclick="exportExcel()" style="padding:8px; background:#2E7D32; color:white; border:none; border-radius:4px; margin-bottom:10px; cursor:pointer;">Xuất Excel</button>
             <table style="width:100%; border-collapse:collapse; font-size:13px">
-                <thead><tr style="background:#f2f2f2"><th style="padding:8px">Active</th><th style="padding:8px">ID</th><th style="padding:8px">Nick</th><th style="padding:8px">Pass</th><th style="padding:8px">Action</th></tr></thead>
+                <thead><tr style="background:#f2f2f2"><th style="padding:8px">Active</th><th style="padding:8px">ID</th><th style="padding:8px">Nick</th><th style="padding:8px">Action</th></tr></thead>
                 <tbody id="mgr-table-body"></tbody>
             </table>
         </div>
@@ -322,19 +308,12 @@
     <div class="sidebar-left">
         <div class="brand-area">
             <div class="sword-title">ĐỆ NHẤT BANG</div>
-            
             <div class="couplet-container">
-                <div class="couplet-text couplet-left">
-                    <span>PHONG</span><span>ĐỘ</span><span>LÀ</span><span>NHẤT</span><span>THỜI</span>
-                </div>
+                <div class="couplet-text couplet-left"><span>PHONG</span><span>ĐỘ</span><span>LÀ</span><span>NHẤT</span><span>THỜI</span></div>
                 <div class="current-ball" id="ball-display">--</div>
-                <div class="couplet-text couplet-right">
-                    <span>ĐẲNG</span><span>CẤP</span><span>LÀ</span><span>MÃI</span><span>MÃI</span>
-                </div>
+                <div class="couplet-text couplet-right"><span>ĐẲNG</span><span>CẤP</span><span>LÀ</span><span>MÃI</span><span>MÃI</span></div>
             </div>
-            
             <div id="status-text" style="color:#B0BEC5; font-size:12px; font-weight:bold; text-transform:uppercase; margin-top:5px; text-align:center">ĐANG CHỜ</div>
-            
             <div id="spin-wrapper" class="spin-area hidden">
                 <button id="btn-spin" class="btn-spin" onclick="adminDraw()">QUAY SỐ</button>
             </div>
@@ -371,7 +350,7 @@
 
     <div class="sidebar-right">
         <div class="right-header">
-            DANH SÁCH ONLINE (<span id="user-count">0</span>)
+            DANH SÁCH (<span id="user-count">0</span>)
         </div>
         <div class="user-list-container" id="user-list-el"></div>
     </div>
@@ -385,15 +364,16 @@
     let usersData = {};
     let isDrawing = false;
 
-    // --- AUTH ---
     function handleLogin() {
         const u = document.getElementById('inp-user').value.trim().toLowerCase();
         const p = document.getElementById('inp-pass').value;
         if(!u || !p) return alert("Thiếu thông tin!");
         db.ref('users/' + u).once('value', snap => {
             const val = snap.val();
-            if(snap.exists() && val.pass == p) loginSuccess(u, val);
-            else alert("Sai thông tin!");
+            if(snap.exists() && val.pass == p) {
+                // Cho phép login kể cả inactive (nhưng sẽ thấy thông báo bị khóa)
+                loginSuccess(u, val);
+            } else alert("Sai thông tin!");
         });
     }
 
@@ -404,7 +384,7 @@
         if(/[^a-z0-9]/.test(u)) return alert("User chỉ gồm chữ thường số!");
         db.ref('users/' + u).once('value', snap => {
             if(snap.exists()) return alert("User đã tồn tại!");
-            const newUser = { pass: p, nickname: u, role: (u === ADMIN_USER)?'admin':'player', active: true, isOnline: true, ticket: null, isReady: false };
+            const newUser = { pass: p, nickname: u, role: (u === ADMIN_USER)?'admin':'player', active: false, isOnline: true, ticket: null, isReady: false }; // Mặc định active: false (chờ duyệt)
             db.ref('users/' + u).set(newUser).then(() => loginSuccess(u, newUser));
         });
     }
@@ -473,10 +453,8 @@
     function renderHeader() {
         document.getElementById('ball-display').innerText = (gameState.current < 10 && gameState.current !== '--') ? '0'+gameState.current : gameState.current;
         document.getElementById('status-text').innerText = (gameState.status === 'playing') ? "ĐANG QUAY..." : "ĐANG CHỜ";
-        
         const btnSpin = document.getElementById('btn-spin');
-        if(gameState.status === 'ended') btnSpin.disabled = true;
-        else btnSpin.disabled = false;
+        btnSpin.disabled = (gameState.status === 'ended');
     }
 
     function renderHistoryModal() {
@@ -485,29 +463,59 @@
         ).join('');
     }
 
+    // --- UPDATED REQ 2: LIST FULL USERS ---
     function renderUserList() {
         const container = document.getElementById('user-list-el');
         container.innerHTML = '';
         let count = 0;
-        Object.keys(usersData).forEach(uid => {
+        
+        // Sắp xếp: Tôi -> Online -> Offline
+        const sortedIDs = Object.keys(usersData).sort((a, b) => {
+            const uA = usersData[a];
+            const uB = usersData[b];
+            if (a === myID) return -1;
+            if (b === myID) return 1;
+            if (uA.isOnline && !uB.isOnline) return -1;
+            if (!uA.isOnline && uB.isOnline) return 1;
+            return 0;
+        });
+
+        sortedIDs.forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
-            if(!u.isOnline && uid !== myID) return;
             
             count++;
             const div = document.createElement('div');
-            div.className = 'u-item-compact';
             
-            const name = u.nickname || uid;
-            const style = u.active===false ? 'text-decoration:line-through; color:#ef5350' : '';
-            const status = !u.ticket ? '<i class="fas fa-plus" style="color:#555"></i>' : (!u.isReady ? '<i class="fas fa-pen" style="color:orange"></i>' : '<i class="fas fa-check" style="color:var(--green)"></i>');
+            // Xử lý class theo trạng thái
+            let itemClass = 'u-item-compact';
+            let iconStatus = '';
             
-            let editBtn = (uid===myID) ? `<i class="fas fa-edit" style="cursor:pointer; margin-left:5px" onclick="changeNick()"></i>` : '';
+            if (u.active === false) {
+                itemClass += ' is-inactive';
+                iconStatus = '<i class="fas fa-ban" style="color:red"></i>';
+            } else if (u.isOnline) {
+                itemClass += ' is-online';
+                // Kiểm tra trạng thái vé nếu online
+                if (!u.ticket) iconStatus = '<i class="fas fa-plus" style="color:#aaa"></i>';
+                else if (!u.isReady) iconStatus = '<i class="fas fa-pen" style="color:orange"></i>';
+                else iconStatus = '<i class="fas fa-check" style="color:var(--green)"></i>';
+            } else {
+                itemClass += ' is-offline';
+                iconStatus = '<i class="fas fa-moon" style="color:#78909C"></i>';
+            }
 
+            const name = u.nickname || uid;
+            let editBtn = (uid===myID) ? `<i class="fas fa-edit" style="cursor:pointer; margin-left:5px" onclick="changeNick()"></i>` : '';
+            
+            // Nếu inactive thì gạch tên
+            const nameStyle = u.active === false ? 'text-decoration:line-through' : '';
+
+            div.className = itemClass;
             div.innerHTML = `
                 <img src="https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=24" class="u-avatar-sm">
-                <div class="u-name-sm" style="${style}">${name} ${editBtn}</div>
-                <div style="font-size:10px">${status}</div>
+                <div class="u-name-sm" style="${nameStyle}">${name} ${editBtn}</div>
+                <div style="font-size:10px">${iconStatus}</div>
             `;
             container.appendChild(div);
         });
@@ -527,6 +535,9 @@
         sortedIDs.forEach(uid => {
             const u = usersData[uid];
             if(u.role === 'admin') return;
+            
+            // Chỉ hiện vé của User Online + Active (để đỡ rối, user offline thì ẩn vé đi)
+            // Hoặc là chính mình (dù bị inactive vẫn hiện để thấy thông báo)
             if((!u.isOnline || u.active === false) && uid !== myID) return;
 
             const isMe = (uid === myID);
@@ -571,7 +582,7 @@
             
             let footer = '';
             if(isMe) {
-                if(u.active === false) gridHTML += `<div class="create-overlay"><span>LOCKED</span></div>`;
+                if(u.active === false) gridHTML += `<div class="create-overlay"><span style="color:red; font-weight:bold">TÀI KHOẢN KHÓA</span></div>`;
                 else {
                     if(!hasTicket) gridHTML += `<div class="create-overlay"><button class="btn-create" onclick="createTicket()">TẠO VÉ</button></div>`;
                     else if(!u.isReady && gameState.status === 'waiting') footer = `<div class="t-footer"><button class="btn-act" style="background:#78909C" onclick="createTicket()">ĐỔI</button><button class="btn-act" style="background:var(--green)" onclick="confirmTicket()">CHỐT</button></div>`;
@@ -648,6 +659,8 @@
         document.getElementById('user-manager-modal').style.display = 'flex';
         renderManagerTable();
     }
+    
+    // --- UPDATED REQ 1: ẨN PASS ---
     function renderManagerTable() {
         const tbody = document.getElementById('mgr-table-body');
         tbody.innerHTML = '';
@@ -660,14 +673,15 @@
                 <td style="text-align:center;"><label class="switch"><input type="checkbox" ${isChecked} onchange="toggleActive('${uid}',this.checked)"><span class="slider"></span></label></td>
                 <td>${uid}</td>
                 <td>${u.nickname||uid}</td>
-                <td>${u.pass}</td>
-                <td><button class="btn-reset" onclick="resetPass('${uid}')">Reset</button></td>
+                <td><button class="btn-reset" onclick="resetPass('${uid}')">Reset Pass</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
     function toggleActive(u, s) { db.ref('users/'+u).update({active:s}); }
     function resetPass(u) { if(confirm("Reset pass?")) db.ref('users/'+u).update({pass:'denhatmaidinh'}); }
+    
+    // --- EXCEL VẪN GIỮ PASS ---
     function exportExcel() {
         const data = [];
         Object.keys(usersData).forEach(uid => {
