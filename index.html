@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lô Tô - Đệ Nhất Bang - Online Version</title>
+    <title>Lô Tô - Đệ Nhất Bang - Multi Session</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     
@@ -38,107 +38,50 @@
 
         .app-layout { display: flex; height: 100%; }
         
-        .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; }
+        /* SIDEBAR STYLE */
+        .sidebar { width: 350px; background: var(--dark); color: white; display: flex; flex-direction: column; border-right: 4px solid var(--gold); box-shadow: 4px 0 15px rgba(0,0,0,0.3); z-index: 100; position: relative; }
         .sidebar-header { padding: 15px; text-align: center; background: rgba(0,0,0,0.2); position: relative; }
         
-        /* Logout Button Style */
-        .logout-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 5px;
-            font-size: 12px;
+        /* LOGOUT BUTTON - GÓC PHẢI */
+        .logout-absolute {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
         }
-        .btn-logout {
-            background: none;
-            border: 1px solid rgba(255,255,255,0.3);
+        .btn-logout-icon {
+            background: rgba(255,255,255,0.1);
             color: #ddd;
-            padding: 4px 10px;
-            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
             cursor: pointer;
-            transition: 0.2s;
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            transition: 0.2s;
         }
-        .btn-logout:hover { background: rgba(255,255,255,0.2); color: white; border-color: white; }
+        .btn-logout-icon:hover { background: var(--red); color: white; border-color: var(--red); transform: scale(1.1); }
 
         #bang-title {
-            font-size: 36px; 
-            font-weight: 800;
-            color: var(--red); 
-            padding: 5px 0 10px 0;
-            text-shadow: 0 0 5px rgba(229, 57, 53, 0.8); 
-            line-height: 1.0; 
+            font-size: 36px; font-weight: 800; color: var(--red); 
+            padding: 15px 0 10px 0; /* Tăng padding top để tránh đè nút logout */
+            text-shadow: 0 0 5px rgba(229, 57, 53, 0.8); line-height: 1.0; 
         }
-        .loto-ball-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 0; 
-            gap: 8px; 
-        }
-        .current-ball { 
-            width: 100px; height: 100px; 
-            background: white; border-radius: 50%; 
-            display: flex; justify-content: center; align-items: center; 
-            font-size: 50px; font-weight: bold; color: var(--red); border: 5px solid var(--gold);
-            box-shadow: 0 0 15px var(--gold);
-            flex-shrink: 0; 
-        }
-        .side-text { 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center;
-            align-items: center; 
-            font-size: 11px; 
-            font-weight: bold; 
-            color: var(--text-light); 
-            opacity: 0.9;
-            text-align: center;
-            flex-grow: 1; 
-            line-height: 1.2; 
-            text-transform: uppercase;
-        }
+        .loto-ball-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; gap: 8px; }
+        .current-ball { width: 100px; height: 100px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 50px; font-weight: bold; color: var(--red); border: 5px solid var(--gold); box-shadow: 0 0 15px var(--gold); flex-shrink: 0; }
+        .side-text { display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; color: var(--text-light); opacity: 0.9; text-align: center; flex-grow: 1; line-height: 1.2; text-transform: uppercase; }
 
-        .history-panel {
-            padding: 10px; 
-            background: rgba(0,0,0,0.5); 
-            color: white; 
-            border-top: 1px solid var(--gold);
-        }
-        #hist-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px; 
-            justify-content: center;
-            padding: 5px 0; 
-            max-height: 100px; 
-            overflow-y: auto;
-            align-items: center;
-        }
-        .history-ball {
-            width: 20px;
-            height: 20px;
-            background: var(--history-ball-color); 
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 10px;
-            font-weight: bold;
-            color: black; 
-            box-shadow: 0 0 3px rgba(0,0,0,0.5);
-            animation: bounceIn 0.3s ease-out; 
-        }
+        .history-panel { padding: 10px; background: rgba(0,0,0,0.5); color: white; border-top: 1px solid var(--gold); }
+        #hist-display { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; padding: 5px 0; max-height: 100px; overflow-y: auto; align-items: center; }
+        .history-ball { width: 20px; height: 20px; background: var(--history-ball-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: bold; color: black; box-shadow: 0 0 3px rgba(0,0,0,0.5); animation: bounceIn 0.3s ease-out; }
 
         .user-list-header { padding: 8px 10px; font-size: 11px; font-weight: bold; color: var(--gold); display: flex; flex-direction: column; background: rgba(0,0,0,0.1); }
         .user-count-row { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; font-size: 10px; }
-        .online-count { color: var(--active-color); }
-        .offline-count { color: #f9a825; }
-
+        
         .user-list-panel { flex: 1; overflow-y: auto; padding: 10px; }
         .user-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px; margin-bottom: 5px; border-radius: 6px; font-size: 13px; border-left: 3px solid transparent; transition: 0.2s; gap: 10px; }
-        .user-item:hover { background: rgba(255,255,255,0.1); }
         .user-item.active { border-left-color: var(--active-color); }
         .user-item.inactive { border-left-color: #aaa; opacity: 0.8; }
         .u-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 5px rgba(255,255,255,0.5); }
@@ -155,8 +98,26 @@
         .btn-reset-pass { background: #FF9800; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; border: none; }
         
         .main-stage { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 15px; align-content: flex-start; }
-        .ticket-card { background: white; width: 160px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid var(--primary); height: fit-content; transition: 0.3s; position: relative; }
+        
+        /* STYLE VÉ SỐ */
+        .ticket-card { background: white; width: 160px; padding: 10px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-top: 5px solid #ccc; height: fit-content; transition: 0.3s; position: relative; }
         .ticket-card.winner { transform: scale(1.1); border-color: var(--red); background: #FFF9C4; z-index: 10; animation: bounce 1s infinite; }
+        
+        /* STYLE ĐẶC BIỆT CHO VÉ CỦA MÌNH (USER HIỆN TẠI) */
+        .ticket-card.is-me {
+            border: 3px solid var(--gold); /* Viền vàng đậm */
+            box-shadow: 0 0 20px rgba(255, 213, 79, 0.4); /* Phát sáng nhẹ */
+            transform: translateY(-5px);
+            z-index: 5;
+        }
+        .ticket-card.is-me .t-header {
+            color: var(--primary);
+            font-size: 13px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--gold);
+            padding-bottom: 3px;
+        }
+
         .t-header { font-size: 12px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; color: #444; }
         .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border: 1px solid #ccc; padding: 5px; border-radius: 8px; }
         .t-cell { height: 35px; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; border-radius: 4px; color: #555; border: 1px solid #ddd; }
@@ -167,6 +128,9 @@
         .pulse-wait .ball-icon { width: 8px; height: 8px; background: var(--history-ball-color); border-radius: 50%; display: inline-block; }
         
         @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         #win-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
         .win-title { color: var(--gold); font-size: 60px; margin: 0; text-shadow: 0 0 20px red; animation: popIn 0.5s; }
@@ -196,11 +160,6 @@
         .connected { background: #4CAF50; color: white; }
         .disconnected { background: #f44336; color: white; }
         .hidden { display: none !important; }
-
-        @keyframes bounceIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes bounce { 0%, 100% { transform: translateY(0) scale(1.1); } 50% { transform: translateY(-10px) scale(1.1); } }
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -233,7 +192,7 @@
     <div id="login-modal">
         <div class="login-box">
             <h2 style="color: var(--primary); margin-top:0;">Lô Tô - Đệ Nhất Bang</h2>
-            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Database chung</div>
+            <div style="font-size:12px; color:#666; margin-bottom:10px;">Phiên bản Online - Multi Session (Tab riêng biệt)</div>
             <input type="text" id="u-name" class="inp-std" placeholder="Tên đăng nhập">
             <input type="password" id="u-pass" class="inp-std" placeholder="Mật khẩu">
             <button class="btn-full btn-login" onclick="handleLogin()">ĐĂNG NHẬP</button>
@@ -255,9 +214,9 @@
     <div class="app-layout">
         <div class="sidebar">
             <div class="sidebar-header">
-                <div id="logout-ui" class="logout-bar hidden">
-                    <button class="btn-logout" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i> Logoff
+                <div id="logout-ui" class="logout-absolute hidden">
+                    <button class="btn-logout-icon" onclick="handleLogout()" title="Đăng xuất / Logoff">
+                        <i class="fas fa-power-off"></i>
                     </button>
                 </div>
 
@@ -404,8 +363,10 @@
         });
     }
 
+    // ==== QUAN TRỌNG: DÙNG SESSION STORAGE ====
     function checkAutoLogin(users) {
-        const savedUser = localStorage.getItem('loto_last_user');
+        // Sửa: Đổi localStorage thành sessionStorage
+        const savedUser = sessionStorage.getItem('loto_current_session_user');
         if (savedUser && users[savedUser]) {
             setupSession(savedUser, users[savedUser].role);
         } else {
@@ -417,30 +378,30 @@
         myUser = user;
         myRole = role;
         document.getElementById('login-modal').classList.add('hidden');
-        localStorage.setItem('loto_last_user', user);
+        // Sửa: Đổi localStorage thành sessionStorage
+        sessionStorage.setItem('loto_current_session_user', user);
+        
         setOnlineStatus(user, true);
         updateUIPermissions();
         renderUI();
     }
 
-    // ==== CHỨC NĂNG LOGOFF MỚI ====
     function handleLogout() {
-        if(myUser) {
-            setOnlineStatus(myUser, false);
-        }
-        localStorage.removeItem('loto_last_user');
+        if(myUser) setOnlineStatus(myUser, false);
+        
+        // Sửa: Xóa session storage
+        sessionStorage.removeItem('loto_current_session_user');
+        
         myUser = null;
         myRole = '';
         
-        // Ẩn các control
         document.getElementById('admin-controls').classList.add('hidden');
         document.getElementById('player-controls').classList.add('hidden');
         document.getElementById('admin-tools-panel').classList.add('hidden');
-        document.getElementById('logout-ui').classList.add('hidden'); // Ẩn nút Logout
+        document.getElementById('logout-ui').classList.add('hidden'); 
         
-        // Hiện lại bảng login
         document.getElementById('login-modal').classList.remove('hidden');
-        document.getElementById('u-pass').value = ''; // Xóa pass cũ
+        document.getElementById('u-pass').value = ''; 
     }
 
     function setOnlineStatus(user, status) {
@@ -457,12 +418,8 @@
     function updateUIPermissions() {
         const roleBadge = document.getElementById('role-badge');
         
-        // Hiện nút Logout khi đã đăng nhập
-        if(myUser) {
-            document.getElementById('logout-ui').classList.remove('hidden');
-        } else {
-            document.getElementById('logout-ui').classList.add('hidden');
-        }
+        if(myUser) document.getElementById('logout-ui').classList.remove('hidden');
+        else document.getElementById('logout-ui').classList.add('hidden');
 
         if(myRole === 'admin') {
             document.getElementById('admin-controls').classList.remove('hidden');
@@ -733,8 +690,14 @@
         const usersToDisplay = Object.keys(currentUsers)
             .filter(u => currentUsers[u].role !== 'admin')
             .filter(u => currentUsers[u].active && currentUsers[u].ticket && currentUsers[u].ticket.length === TICKET_SIZE)
-            // LỌC MỚI: CHỈ HIỆN USER ĐANG ONLINE
-            .filter(u => currentUsers[u].isOnline === true);
+            // LỌC: CHỈ HIỆN USER ONLINE
+            .filter(u => currentUsers[u].isOnline === true)
+            // SẮP XẾP: VÉ CỦA MÌNH (MYUSER) LÊN ĐẦU
+            .sort((a, b) => {
+                if (a === myUser) return -1;
+                if (b === myUser) return 1;
+                return 0;
+            });
         
         usersToDisplay.forEach(u => {
             const user = currentUsers[u];
@@ -758,13 +721,15 @@
             }
 
             const isWinner = (completedRows > 0); 
+            const isMe = (u === myUser);
+
             const card = document.createElement('div');
-            card.className = `ticket-card ${isWinner ? 'winner' : ''}`;
+            // THÊM CLASS 'is-me' NẾU LÀ VÉ CỦA MÌNH
+            card.className = `ticket-card ${isWinner ? 'winner' : ''} ${isMe ? 'is-me' : ''}`;
             if (statusFooterHTML && currentConfig.state !== 'ended') card.classList.add('waiting-pulse');
-            if(u === myUser) card.style.borderTopColor = 'var(--gold)';
 
             card.innerHTML = `
-                <div class="t-header"><span>${u} <span style="color:#00E676; font-size:10px;">●</span></span><span>${isWinner ? 'KINH!' : ''}</span></div>
+                <div class="t-header"><span>${u} ${isMe ? '(Tôi)' : ''}</span><span>${isWinner ? 'KINH!' : ''}</span></div>
                 <div class="t-grid">${cellsHTML}</div>
                 ${statusFooterHTML}`;
             stage.appendChild(card);
